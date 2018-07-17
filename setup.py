@@ -11,18 +11,18 @@ def readme():
         return f.read()
 
 setup(
-      name             =   'pfdicom_tagExtract',
-      version          =   '1.1.4',
-      description      =   '(Python) Extract DICOM header info -- part of the pf* family.',
+      name             =   'pfdicom_tagSub',
+      version          =   '1.0.0',
+      description      =   '(Python) Process DICOM tags and performs substitutions -- part of the pf* family.',
       long_description =   readme(),
       author           =   'FNNDSC',
       author_email     =   'dev@babymri.org',
       url              =   'https://github.com/FNNDSC/med2image',
-      packages         =   ['pfdicom_tagExtract'],
-      install_requires =   ['pfdicom', 'matplotlib'],
+      packages         =   ['pfdicom_tagSub'],
+      install_requires =   ['pfdicom'],
       #test_suite       =   'nose.collector',
       #tests_require    =   ['nose'],
-      scripts          =   ['bin/pfdicom_tagExtract'],
+      scripts          =   ['bin/pfdicom_tagSub'],
       license          =   'MIT',
       zip_safe         =   False
 )

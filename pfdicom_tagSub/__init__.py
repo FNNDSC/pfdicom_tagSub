@@ -1,4 +1,4 @@
 try:
-    from .pfdicom_tagExtract    import pfdicom_tagExtract
+    from .pfdicom_tagSub    import pfdicom_tagSub
 except:
-    from pfdicom_tagExtract     import pfdicom_tagExtract
+    from pfdicom_tagSub     import pfdicom_tagSub

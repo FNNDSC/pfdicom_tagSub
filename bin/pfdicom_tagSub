@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# (c) 2017 Fetal-Neonatal Neuroimaging & Developmental Science Center
+# (c) 2018 Fetal-Neonatal Neuroimaging & Developmental Science Center
 #                   Boston Children's Hospital
 #
 #              http://childrenshospital.org/FNNDSC/
@@ -8,9 +8,9 @@
 #
 
 import sys, os
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), '../pfdicom_tagExtract'))
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), '../pfdicom_tagSub'))
 
-import  pfdicom_tagExtract
+import  pfdicom_tagSub
 from    argparse            import RawTextHelpFormatter
 from    argparse            import ArgumentParser
 import  pudb
@@ -19,7 +19,7 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "1.1.4"
+str_version = "1.0.0"
 str_desc = Colors.CYAN + """
 
 
@@ -69,41 +69,30 @@ def synopsis(ab_shortOnly = False):
                     -I|--inputDir <inputDir>                \\
                         [-i|--inputFile <inputFile>]        \\
                         [-e|--extension <DICOMextension>]   \\
-                        [-F|--tagFile <tagFile>] |          \\
-                        [-T|--tagList <tagList>] |          \\
-                    [-m|--image <imageFile>]                \\
+                        [-F|--tagFile <JSONtagFile>] |      \\
+                        [-T|--tagStruct <JSONtagStruct>] |  \\
                     [-O|--outputDir <outputDir>]            \\
                     [-o|--output <outputFileStem>]          \\
-                    [-t|--outputFileType <outputFileType>]  \\
-                    [-p|--printToScreen]                    \\
                     [-x|--man]                              \\
                     [-y|--synopsis]
 
     BRIEF EXAMPLE
 
-	    %s -l tagList.txt -i slice.dcm
 
     ''' % (scriptName, scriptName, scriptName)
 
     description =  '''
     DESCRIPTION
 
-        `%s` extracts the header information of DICOM files and echoes to
-        stdout as well as to an output report-type file -- this can be a raw
-        output, a json-type output, or html-type output.
+        `%s` replaces a set of <tag, value> pairs in a DICOM header with 
+        values passed in a JSON structure.
 
         The script accepts an <inputDir>, and then from this point an os.walk
         is performed to extract all the subdirs. Each subdir is examined for
-        DICOM files (in the simplest sense by a file extension mapping) and 
-        either the head, tail, middle (or other indexed) file is examined for
-        its tag information.
-
-        Optionally, the tag list can be constrained either by passing a
-        <tagFile> containing a line-by-line list of tags to query, or
-        by passing a comma separated list of tags directly.
-
-        Finally, an image conversion can also be performed (and embedded
-        within the output html file, if an html conversion is specified).
+        DICOM files (in the simplest sense by a file extension mapping) are 
+        passed to a processing method that reads and replaces specified 
+        DICOM tags, saving the result in a corresponding directory and filename
+        in the output tree.
 
     ARGS
 
@@ -124,40 +113,17 @@ def synopsis(ab_shortOnly = False):
         [-O|--outputDir <outputDir>]
         The directory to contain all output files.
 
-        NOTE: If neither -F nor -T are specified, a '-r raw' is
-        assumed.
+        -F|--tagFile <JSONtagFile>
+        Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
 
-        -F|--tagFile <tagFile>
-        Read the tags, one-per-line in <tagFile>, and print the
-        corresponding tag information in the DICOM <inputFile>.
-
-        -T|--tagList <tagList>
-        Read the list of comma-separated tags in <tagList>, and print the
-        corresponding tag information parsed from the DICOM <inputFile>.
-
-        -m|--image <[<index>:]imageFile>
-        If specified, also convert the <inputFile> to <imageFile>. If the
-        name is preceded by an index and colon, then convert this indexed 
-        file in the particular <inputDir>.
+        -T|--tagStruct <JSONtagStructure>
+        Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
+        passed directly in the command line.
 
         -o|--outputFileStem <outputFileStem>
         The output file stem to store data. This should *not* have a file
         extension, or rather, any "." in the name are considered part of 
         the stem and are *not* considered extensions.
-
-        [-t|--outputFileType <outputFileType>]
-        A comma specified list of output types. These can be:
-
-            o <type>    <ext>       <desc>
-            o raw       -raw.txt    the raw internal dcm structure to string
-            o json      .json       a json representation
-            o html      .html       an html representation with optional image
-            o dict      -dict.txt   a python dictionary
-            o col       -col.txt    a two-column text representation (tab sep)
-            o csv       .csv        a csv representation
-
-        [-p|--printToScreen]
-        If specified, will print tags to screen.
 
         [-x|--man]
         Show full help.
@@ -195,20 +161,12 @@ parser.add_argument("-e", "--extension",
                     dest    = 'extension',
                     default = '')
 parser.add_argument("-F", "--tagFile",
-                    help    = "file containing tags to parse",
+                    help    = "JSON formatted file containing tags to sub",
                     dest    = 'tagFile',
                     default = '')
-parser.add_argument("-T", "--tagList",
-                    help    = "comma-separated tag list",
-                    dest    = 'tagList',
-                    default = '')
-parser.add_argument("-r",
-                    help    = "display raw tags",
-                    dest    = 'rawType',
-                    default = 'raw')
-parser.add_argument("-m", "--imageFile",
-                    help    = "image file to convert DICOM input",
-                    dest    = 'imageFile',
+parser.add_argument("-T", "--tagStruct",
+                    help    = "JSON formatted tag sub struct",
+                    dest    = 'tagStruct',
                     default = '')
 parser.add_argument("-o", "--outputFileStem",
                     help    = "output file",
@@ -218,18 +176,9 @@ parser.add_argument("-O", "--outputDir",
                     help    = "output image directory",
                     dest    = 'outputDir',
                     default = '.')
-parser.add_argument("-t", "--outputFileType",
-                    help    = "list of output report types",
-                    dest    = 'outputFileType',
-                    default = '')
 parser.add_argument("--printElapsedTime",
                     help    = "print program run time",
                     dest    = 'printElapsedTime',
-                    action  = 'store_true',
-                    default = False)
-parser.add_argument("-p", "--printToScreen",
-                    help    = "print output to screen",
-                    dest    = 'printToScreen',
                     action  = 'store_true',
                     default = False)
 parser.add_argument("-x", "--man",
@@ -267,24 +216,21 @@ if args.b_version:
     print("Version: %s" % str_version)
     sys.exit(1)
 
-# pudb.set_trace()
+pudb.set_trace()
 
-pf_dicom_tagExtract = pfdicom_tagExtract.pfdicom_tagExtract(
+pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
                         inputDir            = args.inputDir,
                         inputFile           = args.inputFile,
                         extension           = args.extension,
                         outputDir           = args.outputDir,
                         outputFileStem      = args.outputFileStem,
-                        outputFileType      = args.outputFileType,
                         tagFile             = args.tagFile,
-                        tagList             = args.tagList,
-                        printToScreen       = args.printToScreen,
-                        imageFile           = args.imageFile,
+                        tagStruct           = args.tagStruct,
                         verbosity           = args.verbosity
                     )
 
 # And now run it!
 other.tic()
-pf_dicom_tagExtract.run()
-if args.printElapsedTime: pf_dicom_tagExtract.dp.qprint("Elapsed time = %f seconds" % other.toc())
+pf_dicom_tagSub.run()
+if args.printElapsedTime: pf_dicom_tagSub.dp.qprint("Elapsed time = %f seconds" % other.toc())
 sys.exit(0)
