@@ -61,11 +61,11 @@ def synopsis(ab_shortOnly = False):
     shortSynopsis =  '''
     NAME
 
-	    %s 
+	    {intro} 
 
     SYNOPSIS
 
-        %s                                       \\
+        {synopsis}                                       \\
                      -I|--inputDir <inputDir>               \\
                     [-i|--inputFile <inputFile>]            \\
                     [-e|--extension <DICOMextension>]       \\
@@ -79,9 +79,19 @@ def synopsis(ab_shortOnly = False):
 
     BRIEF EXAMPLE
 
-        %s ...
+    {example}  -I /var/www/html/normsmall -e dcm            \\
+            -O /var/www/html/anon                           \\
+            --tagStruct '
+                {
+                "PatientName":       "anonomized",
+                "PatientID":         "%_md5|7_PatientID",
+                "AccessionNumber":   "%_md5|10_AccessionNumber",
+                "PatientBirthDate":  "%_strmsk|******01_PatientBirthDate"
+                }
+            ' --threads 0 --printElapsedTime
 
-    ''' % (scriptName, scriptName, scriptName)
+
+    '''.format(intro = scriptName, synopsis = scriptName, example = scriptName)
 
     description =  '''
     DESCRIPTION
