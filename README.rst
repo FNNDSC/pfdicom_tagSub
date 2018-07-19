@@ -42,6 +42,7 @@ Command line arguments
 
 .. code:: html
 
+
         -I|--inputDir <inputDir>
         Input DICOM directory to examine. By default, the first file in this
         directory is examined for its tag information. There is an implicit
@@ -59,46 +60,30 @@ Command line arguments
         [-O|--outputDir <outputDir>]
         The directory to contain all output files.
 
-        NOTE: If neither -F nor -T are specified, a '-r raw' is
-        assumed.
+        -F|--tagFile <JSONtagFile>
+        Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
 
-        -F|--tagFile <tagFile>
-        Read the tags, one-per-line in <tagFile>, and print the
-        corresponding tag information in the DICOM <inputFile>.
-
-        -T|--tagList <tagList>
-        Read the list of comma-separated tags in <tagList>, and print the
-        corresponding tag information parsed from the DICOM <inputFile>.
-
-        -m|--image <[<index>:]imageFile>
-        If specified, also convert the <inputFile> to <imageFile>. If the
-        name is preceded by an index and colon, then convert this indexed 
-        file in the particular <inputDir>.
+        -T|--tagStruct <JSONtagStructure>
+        Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
+        passed directly in the command line.
 
         -o|--outputFileStem <outputFileStem>
         The output file stem to store data. This should *not* have a file
         extension, or rather, any "." in the name are considered part of 
         the stem and are *not* considered extensions.
 
-        [-t|--outputFileType <outputFileType>]
-        A comma specified list of output types. These can be:
-
-            o <type>    <ext>       <desc>
-            o raw       -raw.txt    the raw internal dcm structure to string
-            o json      .json       a json representation
-            o html      .html       an html representation with optional image
-            o dict      -dict.txt   a python dictionary
-            o col       -col.txt    a two-column text representation (tab sep)
-            o csv       .csv        a csv representation
-
-        [-p|--printToScreen]
-        If specified, will print tags to screen.
+        [--threads <numThreads>]
+        If specified, break the innermost analysis loop into <numThreads>
+        threads.
 
         [-x|--man]
         Show full help.
 
         [-y|--synopsis]
         Show brief help.
+
+        [--json]
+        If specified, output a JSON dump of final return.
 
         -v|--verbosity <level>
         Set the app verbosity level. 
@@ -114,10 +99,16 @@ Run on a target tree and output some detail and stats
 
 .. code:: bash
 
-        pfdicom         -I /var/www/html/normative              \
-                        -e dcm                                  \
-                        -O /var/www/html/tag2                   \
-                        -t raw,json,html,dict,col,csv           \
-                        -o %PatientAge-%_md5.6_PatientID        \ 
-                        -m m:%PatientAge-%_md5.6_PatientID.jpg 
+        pfdicom_tagSub                                      \
+                    -I /var/www/html/normsmall -e dcm       \
+                    -O /var/www/html/anon                   \
+                    --tagStruct '
+                    {
+                        "PatientName":       "anonomized",
+                        "PatientID":         "%_md5|7_PatientID",
+                        "AccessionNumber":   "%_md5|10_AccessionNumber",
+                        "PatientBirthDate":  "%_strmsk|******01_PatientBirthDate"
+                    }
+                    ' --threads 0 --printElapsedTime
+ 
  
