@@ -61,23 +61,25 @@ def synopsis(ab_shortOnly = False):
     shortSynopsis =  '''
     NAME
 
-	    %s - process DICOM file header information down a file system tree.
+	    %s 
 
     SYNOPSIS
 
-            %s                                       \\
-                    -I|--inputDir <inputDir>                \\
-                        [-i|--inputFile <inputFile>]        \\
-                        [-e|--extension <DICOMextension>]   \\
-                        [-F|--tagFile <JSONtagFile>] |      \\
-                        [-T|--tagStruct <JSONtagStruct>] |  \\
-                    [-O|--outputDir <outputDir>]            \\
-                    [-o|--output <outputFileStem>]          \\
+        %s                                       \\
+                     -I|--inputDir <inputDir>               \\
+                    [-i|--inputFile <inputFile>]            \\
+                    [-e|--extension <DICOMextension>]       \\
+                    [-F|--tagFile <tagFile>] |              \\
+                    [-T|--tagList <tagList>] |              \\
+                    [--threads <numThreads>]                \\
+                     -O|--outputDir <outputDir>             \\
                     [-x|--man]                              \\
-                    [-y|--synopsis]
+                    [-y|--synopsis]                         \\
+                    [--json]
 
     BRIEF EXAMPLE
 
+        %s ...
 
     ''' % (scriptName, scriptName, scriptName)
 
@@ -125,11 +127,18 @@ def synopsis(ab_shortOnly = False):
         extension, or rather, any "." in the name are considered part of 
         the stem and are *not* considered extensions.
 
+        [--threads <numThreads>]
+        If specified, break the innermost analysis loop into <numThreads>
+        threads.
+
         [-x|--man]
         Show full help.
 
         [-y|--synopsis]
         Show brief help.
+
+        [--json]
+        If specified, output a JSON dump of final return.
 
         -v|--verbosity <level>
         Set the app verbosity level. 
@@ -181,6 +190,10 @@ parser.add_argument("--printElapsedTime",
                     dest    = 'printElapsedTime',
                     action  = 'store_true',
                     default = False)
+parser.add_argument("--threads",
+                    help    = "number of threads for innermost loop processing",
+                    dest    = 'threads',
+                    default = "1")
 parser.add_argument("-x", "--man",
                     help    = "man",
                     dest    = 'man',
@@ -189,6 +202,11 @@ parser.add_argument("-x", "--man",
 parser.add_argument("-y", "--synopsis",
                     help    = "short synopsis",
                     dest    = 'synopsis',
+                    action  = 'store_true',
+                    default = False)
+parser.add_argument("--json",
+                    help    = "output final return in json",
+                    dest    = 'json',
                     action  = 'store_true',
                     default = False)
 parser.add_argument("-v", "--verbosity",
@@ -216,7 +234,7 @@ if args.b_version:
     print("Version: %s" % str_version)
     sys.exit(1)
 
-pudb.set_trace()
+# pudb.set_trace()
 
 pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
                         inputDir            = args.inputDir,
@@ -226,7 +244,9 @@ pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
                         outputFileStem      = args.outputFileStem,
                         tagFile             = args.tagFile,
                         tagStruct           = args.tagStruct,
-                        verbosity           = args.verbosity
+                        threads             = args.threads,
+                        verbosity           = args.verbosity,
+                        json                = args.json
                     )
 
 # And now run it!
