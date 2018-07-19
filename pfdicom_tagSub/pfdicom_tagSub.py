@@ -41,7 +41,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         # Tags
         self.b_tagList                  = False
         self.b_tagFile                  = False
-        self.b_json                     = False
         self.str_tagStruct              = ''
         self.str_tagFile                = ''
         self.d_tagStruct                = {}
@@ -89,7 +88,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             if key == 'tagFile':            tagFile_process(value)
             if key == 'tagStruct':          tagStruct_process(value)
             if key == 'verbosity':          self.verbosityLevel         = int(value)
-            if key == 'json':               self.b_json                 = bool(value)
 
         # Set logging
         self.dp                        = pfmisc.debug(    
@@ -307,7 +305,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         }
 
         if self.b_json:
-            json.dumps(d_ret)
+            print(json.dumps(d_ret))
 
         return d_ret
         
