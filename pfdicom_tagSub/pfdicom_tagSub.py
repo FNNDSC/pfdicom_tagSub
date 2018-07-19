@@ -41,6 +41,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         # Tags
         self.b_tagList                  = False
         self.b_tagFile                  = False
+        self.b_json                     = False
         self.str_tagStruct              = ''
         self.str_tagFile                = ''
         self.d_tagStruct                = {}
@@ -88,6 +89,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             if key == 'tagFile':            tagFile_process(value)
             if key == 'tagStruct':          tagStruct_process(value)
             if key == 'verbosity':          self.verbosityLevel         = int(value)
+            if key == 'json':               self.b_json                 = bool(value)
 
         # Set logging
         self.dp                        = pfmisc.debug(    
@@ -114,21 +116,20 @@ class pfdicom_tagSub(pfdicom.pfdicom):
     def tags_process(self, *args, **kwargs):
         """
         Process the tag information for each file in this pass.
+
+        In order to be thread-safe, all directory/file 
+        descriptors must be *absolute* and no chdir()'s
+        must ever be called!
+
         """
 
         str_path            = ''
         l_file              = []
         b_status            = True
 
-        # These are declared in the base class
-        self.dcm            = None
-        self.d_dcm          = {}
-        self.d_dicom        = {}
-        self.d_dicomSimple  = {}
-
-        # list structure to track all dcm objects processed 
-        # in this path
+        # list structure to track all dcm objects processed in this path
         l_dcm               = []
+        b_status            = True
 
         for k, v in kwargs.items():
             if k == 'l_file':   l_file      = v
@@ -140,7 +141,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             l_file          = at_data[1]
 
         for f in l_file:
-
             d_DCMfileRead   = self.DICOMfile_read( 
                                     file        = '%s/%s' % (str_path, f)
             )
@@ -148,10 +148,10 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             l_tagsToUse     = d_DCMfileRead['l_tagsToUse']      
             if b_status:
                 for k, v in self.d_tagStruct.items():
-                    d_tagsInStruct  = self.tagsInString_process(v)
+                    d_tagsInStruct  = self.tagsInString_process(d_DCMfileRead['d_DICOM'], v)
                     str_tagValue    = d_tagsInStruct['str_result']
-                    setattr(self.dcm, k, str_tagValue)
-                l_dcm.append(self.dcm)
+                    setattr(d_DCMfileRead['d_DICOM']['dcm'], k, str_tagValue)
+                l_dcm.append(d_DCMfileRead['d_DICOM']['dcm'])
 
         return {
             'status':           b_status,
@@ -160,69 +160,154 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             'str_path':         d_DCMfileRead['inputPath'],
         }
 
-    def outputSave(self, at_data, **kwags):
+    def inputReadCallback(self, *args, **kwargs):
+        """
+        Callback for reading files from specific directory.
+
+        In the context of pfdicom_tagSub, this implies reading
+        DICOM files and returning the dcm data set.
+
+        """
+        str_path            = ''
+        l_file              = []
+        b_status            = True
+        l_DCMRead           = []
+
+        for k, v in kwargs.items():
+            if k == 'l_file':   l_file      = v
+            if k == 'path':     str_path    = v
+
+        if len(args):
+            at_data         = args[0]
+            str_path        = at_data[0]
+            l_file          = at_data[1]
+
+        for f in l_file:
+            d_DCMfileRead   = self.DICOMfile_read( 
+                                    file        = '%s/%s' % (str_path, f)
+            )
+            b_status        = b_status and d_DCMfileRead['status']
+            l_DCMRead.append(d_DCMfileRead)            
+
+        return {
+            'status':           b_status,
+            'l_file':           l_file,
+            'str_path':         d_DCMfileRead['inputPath'],
+            'l_DCMRead':        l_DCMRead
+        }
+
+    def inputAnalyzeCallback(self, *args, **kwargs):
+        """
+        Callback for doing actual work on the read data.
+
+        This essentially means substituting tags in the 
+        passed list of dcm data sets.
+        """
+        d_DCMRead           = {}
+        b_status            = True
+        l_dcm               = []
+
+        # pudb.set_trace()
+
+        for k, v in kwargs.items():
+            if k == 'd_DCMRead':    d_DCMRead   = v
+            if k == 'path':         str_path    = v
+
+        if len(args):
+            at_data         = args[0]
+            str_path        = at_data[0]
+            d_DCMRead       = at_data[1]
+
+        for d_DCMfileRead in d_DCMRead['l_DCMRead']:
+            for k, v in self.d_tagStruct.items():
+                d_tagsInStruct  = self.tagsInString_process(d_DCMfileRead['d_DICOM'], v)
+                str_tagValue    = d_tagsInStruct['str_result']
+                setattr(d_DCMfileRead['d_DICOM']['dcm'], k, str_tagValue)
+            l_dcm.append(d_DCMfileRead['d_DICOM']['dcm'])
+
+        return {
+            'status':           b_status,
+            'l_dcm':            l_dcm,
+            'str_path':         d_DCMRead['str_path'],
+            'l_file':           d_DCMRead['l_file']
+        }
+
+    def outputSaveCallback(self, at_data, **kwags):
         """
         Callback for saving outputs.
+
+        In order to be thread-safe, all directory/file 
+        descriptors must be *absolute* and no chdir()'s
+        must ever be called!
         """
 
-        d_outputInfo        = at_data[1]
-        str_outputImageFile = ""
-        d_convertToImg      = {}
         path                = at_data[0]
+        d_outputInfo        = at_data[1]
         str_cwd             = os.getcwd()
         other.mkdir(self.str_outputDir)
-        self.dp.qprint("In output base directory:     %s" % self.str_outputDir)
-        os.chdir(self.str_outputDir)
+        # self.dp.qprint("In output base directory:     %s" % self.str_outputDir)
+        # os.chdir(self.str_outputDir)
         other.mkdir(path)
-        os.chdir(path)
+        # os.chdir(path)
 
         for f, ds in zip(d_outputInfo['l_file'], d_outputInfo['l_dcm']):
-            ds.save_as(f)
-            self.dp.qprint("saving in path: %s" % path)
-            self.dp.qprint("DICOM file:     %s" % f)
+            ds.save_as('%s/%s' % (path, f))
+            # self.dp.qprint("saving in path: %s" % path)
+            # self.dp.qprint("DICOM file:     %s" % f)
 
-        os.chdir(str_cwd)
+        # os.chdir(str_cwd)
         return {
             'status':   True
         }
 
+    def tags_substitute(self, **kwargs):
+        """
+        A simple "alias" for calling the pftree method.
+        """
+        d_tagSub        = {}
+        d_tagSub        = self.pf_tree.tree_process(
+                            inputReadCallback       = self.inputReadCallback,
+                            analysisCallback        = self.inputAnalyzeCallback,
+                            outputWriteCallback     = self.outputSaveCallback,
+                            persistAnalysisResults  = False
+        )
+        return d_tagSub
+
+
     def run(self, *args, **kwargs):
         """
-        The run method demonstrates how to correctly call 
-        sub-components relating to the program execution.
+        The run method calls the base class run() to 
+        perform initial probe and analysis.
+
+        Then, it effectively calls the method to perform
+        the DICOM tag substitution.
+
         """
         b_status        = True
         d_pftreeRun     = {}
         d_inputAnalysis = {}
         d_tagSub        = {}
-        d_env           = self.env_check()
 
-        if d_env['status']:
-            d_pftreeRun = self.pf_tree.run()
-        else:
-            b_status    = False 
+        # Run the base class, which probes the file tree
+        # and does an initial analysis
+        d_pfdicom       = super().run()
 
-        str_startDir    = os.getcwd()
-        os.chdir(self.str_inputDir)
-        if b_status:
-            d_inputAnalysis = self.pf_tree.tree_analysisApply(
-                                analysiscallback        = self.filelist_prune,
-                                applyResultsTo          = 'inputTree',
-                                applyKey                = 'l_file',
-                                persistAnalysisResults  = True
-            )
-            d_tagSub        = self.pf_tree.tree_analysisApply(
-                                analysiscallback        = self.tags_process,
-                                outputcallback          = self.outputSave,
-                                persistAnalysisResults  = False
-            )
+        if d_pfdicom['status']:
+            str_startDir    = os.getcwd()
+            os.chdir(self.str_inputDir)
+            if b_status:
+                d_tagSub    = self.tags_substitute()
+                b_status    = b_status and d_tagSub['status']
+            os.chdir(str_startDir)
 
-        os.chdir(str_startDir)
-        return {
-            'status':           b_status and d_pftreeRun['status'],
-            'd_env':            d_env,
-            'd_pftreeRun':      d_pftreeRun,
+        d_ret = {
+            'status':           b_status,
+            'd_pfdicom':        d_pfdicom,
             'd_tagSub':         d_tagSub,
-            'd_inputAnalysis':  d_inputAnalysis
         }
+
+        if self.b_json:
+            json.dumps(d_ret)
+
+        return d_ret
         
