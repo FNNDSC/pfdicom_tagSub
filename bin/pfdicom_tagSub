@@ -58,14 +58,14 @@ str_desc = Colors.CYAN + """
 
 def synopsis(ab_shortOnly = False):
     scriptName = os.path.basename(sys.argv[0])
-    shortSynopsis =  '''
+    shortSynopsis =  """
     NAME
 
-	    {intro} 
+	    pfdicom_tagSub 
 
     SYNOPSIS
 
-        {synopsis}                                       \\
+        pfdicom_tagSub                                      \\
                      -I|--inputDir <inputDir>               \\
                     [-i|--inputFile <inputFile>]            \\
                     [-e|--extension <DICOMextension>]       \\
@@ -79,25 +79,24 @@ def synopsis(ab_shortOnly = False):
 
     BRIEF EXAMPLE
 
-    {example}  -I /var/www/html/normsmall -e dcm            \\
-            -O /var/www/html/anon                           \\
-            --tagStruct '
-                {
-                "PatientName":       "anonomized",
-                "PatientID":         "%_md5|7_PatientID",
-                "AccessionNumber":   "%_md5|10_AccessionNumber",
-                "PatientBirthDate":  "%_strmsk|******01_PatientBirthDate"
-                }
-            ' --threads 0 --printElapsedTime
-
-
-    '''.format(intro = scriptName, synopsis = scriptName, example = scriptName)
+        pfdicom_tagSub                                      \\
+                    -I /var/www/html/normsmall -e dcm       \\
+                    -O /var/www/html/anon                   \\
+                    --tagStruct '
+                    {
+                        "PatientName":       "anonomized",
+                        "PatientID":         "%_md5|7_PatientID",
+                        "AccessionNumber":   "%_md5|10_AccessionNumber",
+                        "PatientBirthDate":  "%_strmsk|******01_PatientBirthDate"
+                    }
+                    ' --threads 0 --printElapsedTime
+    """
 
     description =  '''
     DESCRIPTION
 
-        `%s` replaces a set of <tag, value> pairs in a DICOM header with 
-        values passed in a JSON structure.
+        pfdicom_tagSub replaces a set of <tag, value> pairs in a DICOM header
+        with values passed in a JSON structure.
 
         The script accepts an <inputDir>, and then from this point an os.walk
         is performed to extract all the subdirs. Each subdir is examined for
@@ -158,7 +157,20 @@ def synopsis(ab_shortOnly = False):
 
     EXAMPLES
 
-    ''' % (scriptName)
+        pfdicom_tagSub                                      \\
+                    -I /var/www/html/normsmall -e dcm       \\
+                    -O /var/www/html/anon                   \\
+                    --tagStruct '
+                    {
+                        "PatientName":       "anonomized",
+                        "PatientID":         "%_md5|7_PatientID",
+                        "AccessionNumber":   "%_md5|10_AccessionNumber",
+                        "PatientBirthDate":  "%_strmsk|******01_PatientBirthDate"
+                    }
+                    ' --threads 0 --printElapsedTime
+
+    '''
+    
     if ab_shortOnly:
         return shortSynopsis
     else:
