@@ -170,6 +170,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         l_file              = []
         b_status            = True
         l_DCMRead           = []
+        filesRead           = 0
 
         for k, v in kwargs.items():
             if k == 'l_file':   l_file      = v
@@ -185,13 +186,18 @@ class pfdicom_tagSub(pfdicom.pfdicom):
                                     file        = '%s/%s' % (str_path, f)
             )
             b_status        = b_status and d_DCMfileRead['status']
-            l_DCMRead.append(d_DCMfileRead)            
+            l_DCMRead.append(d_DCMfileRead)
+            str_path        = d_DCMfileRead['inputPath']
+            filesRead       += 1
+
+        if not len(l_file): b_status = False
 
         return {
             'status':           b_status,
             'l_file':           l_file,
-            'str_path':         d_DCMfileRead['inputPath'],
-            'l_DCMRead':        l_DCMRead
+            'str_path':         str_path,
+            'l_DCMRead':        l_DCMRead,
+            'filesRead':        filesRead
         }
 
     def inputAnalyzeCallback(self, *args, **kwargs):
@@ -202,8 +208,10 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         passed list of dcm data sets.
         """
         d_DCMRead           = {}
-        b_status            = True
+        b_status            = False
         l_dcm               = []
+        l_file              = []
+        filesAnalyzed       = 0
 
         # pudb.set_trace()
 
@@ -222,12 +230,17 @@ class pfdicom_tagSub(pfdicom.pfdicom):
                 str_tagValue    = d_tagsInStruct['str_result']
                 setattr(d_DCMfileRead['d_DICOM']['dcm'], k, str_tagValue)
             l_dcm.append(d_DCMfileRead['d_DICOM']['dcm'])
+            str_path    = d_DCMRead['str_path']
+            l_file      = d_DCMRead['l_file']
+            b_status    = True
+            filesAnalyzed += 1
 
         return {
             'status':           b_status,
             'l_dcm':            l_dcm,
-            'str_path':         d_DCMRead['str_path'],
-            'l_file':           d_DCMRead['l_file']
+            'str_path':         str_path,
+            'l_file':           l_file,
+            'filesAnalyzed':    filesAnalyzed
         }
 
     def outputSaveCallback(self, at_data, **kwags):
@@ -243,6 +256,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         d_outputInfo        = at_data[1]
         str_cwd             = os.getcwd()
         other.mkdir(self.str_outputDir)
+        filesSaved          = 0
         # self.dp.qprint("In output base directory:     %s" % self.str_outputDir)
         # os.chdir(self.str_outputDir)
         other.mkdir(path)
@@ -252,10 +266,12 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             ds.save_as('%s/%s' % (path, f))
             # self.dp.qprint("saving in path: %s" % path)
             # self.dp.qprint("DICOM file:     %s" % f)
+            filesSaved += 1
 
         # os.chdir(str_cwd)
         return {
-            'status':   True
+            'status':       True,
+            'filesSaved':   filesSaved
         }
 
     def tags_substitute(self, **kwargs):
@@ -270,7 +286,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
                             persistAnalysisResults  = False
         )
         return d_tagSub
-
 
     def run(self, *args, **kwargs):
         """
@@ -287,8 +302,10 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         d_tagSub        = {}
 
         # Run the base class, which probes the file tree
-        # and does an initial analysis
-        d_pfdicom       = super().run()
+        # and does an initial analysis. Also suppress the
+        # base class from printing JSON results since those 
+        # will be printed by this class
+        d_pfdicom       = super().run(JSONprint = False)
 
         if d_pfdicom['status']:
             str_startDir    = os.getcwd()
@@ -304,8 +321,10 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             'd_tagSub':         d_tagSub,
         }
 
+        d_ret['runTime']    = other.toc()
+
         if self.b_json:
-            print(json.dumps(d_ret))
+            self.ret_dump(d_ret, **kwargs)
 
         return d_ret
         
