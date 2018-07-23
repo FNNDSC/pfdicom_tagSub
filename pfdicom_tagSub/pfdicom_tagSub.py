@@ -92,7 +92,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         # Set logging
         self.dp                        = pfmisc.debug(    
                                             verbosity   = self.verbosityLevel,
-                                            level       = 0,
                                             within      = self.__name__
                                             )
         self.log                       = pfmisc.Message()
@@ -182,6 +181,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             l_file          = at_data[1]
 
         for f in l_file:
+            self.dp.qprint("reading: %s/%s" % (str_path, f), level = 5)
             d_DCMfileRead   = self.DICOMfile_read( 
                                     file        = '%s/%s' % (str_path, f)
             )
@@ -233,6 +233,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             str_path    = d_DCMRead['str_path']
             l_file      = d_DCMRead['l_file']
             b_status    = True
+            self.dp.qprint("analyzed: %s" % l_file[filesAnalyzed], level = 5)
             filesAnalyzed += 1
 
         return {
@@ -257,18 +258,13 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         str_cwd             = os.getcwd()
         other.mkdir(self.str_outputDir)
         filesSaved          = 0
-        # self.dp.qprint("In output base directory:     %s" % self.str_outputDir)
-        # os.chdir(self.str_outputDir)
         other.mkdir(path)
-        # os.chdir(path)
 
         for f, ds in zip(d_outputInfo['l_file'], d_outputInfo['l_dcm']):
             ds.save_as('%s/%s' % (path, f))
-            # self.dp.qprint("saving in path: %s" % path)
-            # self.dp.qprint("DICOM file:     %s" % f)
+            self.dp.qprint("saving: %s/%s" % (path, f), level = 5)
             filesSaved += 1
 
-        # os.chdir(str_cwd)
         return {
             'status':       True,
             'filesSaved':   filesSaved
