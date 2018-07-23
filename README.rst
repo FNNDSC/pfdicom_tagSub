@@ -88,14 +88,19 @@ Command line arguments
         -v|--verbosity <level>
         Set the app verbosity level. 
 
-             -1: No internal output.
-              0: All internal output.
-
-
+            0: No internal output;
+            1: Run start / stop output notification;
+            2: As with level '1' but with simpleProgress bar in 'pftree';
+            3: As with level '2' but with list of input dirs/files in 'pftree';
+            5: As with level '3' but with explicit file logging for
+                    - read
+                    - analyze
+                    - write
+                    
 Examples
 ~~~~~~~~
 
-Run on a target tree and output some detail and stats
+Perform a DICOM anonymization by processing specific tags:
 
 .. code:: bash
 
@@ -109,6 +114,7 @@ Run on a target tree and output some detail and stats
                         "AccessionNumber":   "%_md5|10_AccessionNumber",
                         "PatientBirthDate":  "%_strmsk|******01_PatientBirthDate"
                     }
-                    ' --threads 0 --printElapsedTime
- 
+                    ' --threads 0 -v 0 --json
+
+which will output only at script conclusion and will log a JSON formatted string.
  
