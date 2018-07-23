@@ -225,15 +225,15 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             d_DCMRead       = at_data[1]
 
         for d_DCMfileRead in d_DCMRead['l_DCMRead']:
+            str_path    = d_DCMRead['str_path']
+            l_file      = d_DCMRead['l_file']
+            self.dp.qprint("analyzing: %s" % l_file[filesAnalyzed], level = 5)
             for k, v in self.d_tagStruct.items():
                 d_tagsInStruct  = self.tagsInString_process(d_DCMfileRead['d_DICOM'], v)
                 str_tagValue    = d_tagsInStruct['str_result']
                 setattr(d_DCMfileRead['d_DICOM']['dcm'], k, str_tagValue)
             l_dcm.append(d_DCMfileRead['d_DICOM']['dcm'])
-            str_path    = d_DCMRead['str_path']
-            l_file      = d_DCMRead['l_file']
             b_status    = True
-            self.dp.qprint("analyzed: %s" % l_file[filesAnalyzed], level = 5)
             filesAnalyzed += 1
 
         return {
@@ -296,6 +296,11 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         d_tagSub        = {}
         b_timerStart    = False
 
+        self.dp.qprint(
+                "Starting pfdicom_tagSub run... (please be patient while running)", 
+                level = 1
+                )
+
         for k, v in kwargs.items():
             if k == 'timerStart':   b_timerStart    = bool(v)
 
@@ -328,6 +333,8 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
         if self.b_json:
             self.ret_dump(d_ret, **kwargs)
+
+        self.dp.qprint('Returing from pfdicom_tagSub run...', level = 1)
 
         return d_ret
         
