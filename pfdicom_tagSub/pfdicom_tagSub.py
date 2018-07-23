@@ -297,15 +297,23 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
         """
         b_status        = True
-        d_pftreeRun     = {}
-        d_inputAnalysis = {}
         d_tagSub        = {}
+        b_timerStart    = False
+
+        for k, v in kwargs.items():
+            if k == 'timerStart':   b_timerStart    = bool(v)
+
+        if b_timerStart:
+            other.tic()
 
         # Run the base class, which probes the file tree
         # and does an initial analysis. Also suppress the
         # base class from printing JSON results since those 
         # will be printed by this class
-        d_pfdicom       = super().run(JSONprint = False)
+        d_pfdicom       = super().run(
+                                        JSONprint   = False,
+                                        timerStart  = False
+                                    )
 
         if d_pfdicom['status']:
             str_startDir    = os.getcwd()
@@ -316,12 +324,11 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             os.chdir(str_startDir)
 
         d_ret = {
-            'status':           b_status,
-            'd_pfdicom':        d_pfdicom,
-            'd_tagSub':         d_tagSub,
+            'status':       b_status,
+            'd_pfdicom':    d_pfdicom,
+            'd_tagSub':     d_tagSub,
+            'runTime':      other.toc()
         }
-
-        d_ret['runTime']    = other.toc()
 
         if self.b_json:
             self.ret_dump(d_ret, **kwargs)
