@@ -234,7 +234,7 @@ parser.add_argument("--json",
 parser.add_argument("-v", "--verbosity",
                     help    = "verbosity level for app",
                     dest    = 'verbosity',
-                    default = "0")
+                    default = "1")
 parser.add_argument('--version',
                     help    = 'if specified, print version number',
                     dest    = 'b_version',
