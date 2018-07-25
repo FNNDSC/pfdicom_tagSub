@@ -16,7 +16,7 @@ pfdicom_tagSub
 Quick Overview
 --------------
 
--  ``pfdicom_tagSub`` reads/edits/saves DICOM meta information. It can be used to de facto anonymize DICOM data.
+-  ``pfdicom_tagSub`` reads/edits/saves DICOM meta information. It can be used to anonymize DICOM header data.
 
 Overview
 --------
@@ -116,7 +116,7 @@ Perform a DICOM anonymization by processing specific tags:
                     -O /var/www/html/anon                   \
                     --tagStruct '
                     {
-                        "PatientName":       "anonomized",
+                        "PatientName":       "anonymized",
                         "PatientID":         "%_md5|7_PatientID",
                         "AccessionNumber":   "%_md5|10_AccessionNumber",
                         "PatientBirthDate":  "%_strmsk|******01_PatientBirthDate"
