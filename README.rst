@@ -1,21 +1,29 @@
-pfdicom_tagExtract
+pfdicom_tagSub
 ==================
+
+.. image:: https://badge.fury.io/py/pfdicom_tagSub.svg
+    :target: https://badge.fury.io/py/pfdicom_tagSub
+
+.. image:: https://travis-ci.org/FNNDSC/pfdicom_tagSub.svg?branch=master
+    :target: https://travis-ci.org/FNNDSC/pfdicom_tagSub
+
+.. image:: https://img.shields.io/badge/python-3.5%2B-blue.svg
+    :target: https://badge.fury.io/py/pfdicom_tagSub
+
+.. contents:: Table of Contents
+
 
 Quick Overview
 --------------
 
--  pfdicom_tagExtract generates reports in various formats based on DICOM tags
+-  ``pfdicom_tagSub`` reads/edits/saves DICOM meta information. It can be used to de facto anonymize DICOM data.
 
 Overview
 --------
 
-pfdicom_tagExtract extracts the header information of DICOM files and echoes to stdout as well as to an output report-type file -- this can be a raw output, a json-type output, or html-type output.
+``pfdicom_tagSub`` replaces a set of ``<tag, value>`` pairs in a DICOM header with values passed in a JSON structure.
 
-The script accepts an <inputDir>, and then from this point an os.walk  is performed to extract all the subdirs. Each subdir is examined for DICOM files (in the simplest sense by a file extension mapping) and either the head, tail, middle (or other indexed) file is examined for its tag information.
-
-Optionally, the tag list can be constrained either by passing a <tagFile> containing a line-by-line list of tags to query, or by passing a comma separated list of tags directly.
-
-Finally, an image conversion can also be performed (and embedded within the output html file, if an html conversion is specified).
+The script accepts an ``<inputDir>``, and then from this point an ``os.walk()`` is performed to extract all the subdirs. Each subdir is examined for DICOM files (in the simplest sense by a file extension mapping) are passed to a processing method that reads and replaces specified DICOM tags, saving the result in a corresponding directory and filename in the output tree.
 
 Dependencies
 ------------
@@ -24,8 +32,7 @@ The following dependencies are installed on your host system/python3 virtual env
 
 -  pfmisc (various misc modules and classes for the pf* family of objects)
 -  pftree (create a dictionary representation of a filesystem hierarchy)
--  pfidcom (handle underlying DICOM file reading)
--  matplotlib (handle saving / conversion to image formats for html reports)
+-  pfdicom (handle underlying DICOM file reading)
 
 Installation
 ~~~~~~~~~~~~
@@ -35,7 +42,7 @@ by fetching it from PyPI
 
 .. code:: bash
 
-        pip3 install pfdciom_tagExtract
+        pip3 install pfdciom_tagSub
 
 Command line arguments
 ----------------------
