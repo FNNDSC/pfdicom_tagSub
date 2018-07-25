@@ -36,7 +36,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         # Object desc block
         #
         self.str_desc                   = ''
-        self.__name__                   = "pfdicom_tagExtract"
+        self.__name__                   = "pfdicom_tagSub"
 
         # Tags
         self.b_tagList                  = False
@@ -96,66 +96,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
                                             )
         self.log                       = pfmisc.Message()
         self.log.syslog(True)
-
-    def filelist_prune(self, at_data, *args, **kwargs):
-        """
-        Given a list of files, possibly prune list by 
-        extension.
-        """
-        if len(self.str_extension):
-            al_file = at_data[1]
-            al_file = [x for x in al_file if self.str_extension in x]
-        return {
-            'status':   True,
-            'l_file':   al_file
-        }
-
-    def tags_process(self, *args, **kwargs):
-        """
-        Process the tag information for each file in this pass.
-
-        In order to be thread-safe, all directory/file 
-        descriptors must be *absolute* and no chdir()'s
-        must ever be called!
-
-        """
-
-        str_path            = ''
-        l_file              = []
-        b_status            = True
-
-        # list structure to track all dcm objects processed in this path
-        l_dcm               = []
-        b_status            = True
-
-        for k, v in kwargs.items():
-            if k == 'l_file':   l_file      = v
-            if k == 'path':     str_path    = v
-
-        if len(args):
-            at_data         = args[0]
-            str_path        = at_data[0]
-            l_file          = at_data[1]
-
-        for f in l_file:
-            d_DCMfileRead   = self.DICOMfile_read( 
-                                    file        = '%s/%s' % (str_path, f)
-            )
-            b_status        = b_status and d_DCMfileRead['status']
-            l_tagsToUse     = d_DCMfileRead['l_tagsToUse']      
-            if b_status:
-                for k, v in self.d_tagStruct.items():
-                    d_tagsInStruct  = self.tagsInString_process(d_DCMfileRead['d_DICOM'], v)
-                    str_tagValue    = d_tagsInStruct['str_result']
-                    setattr(d_DCMfileRead['d_DICOM']['dcm'], k, str_tagValue)
-                l_dcm.append(d_DCMfileRead['d_DICOM']['dcm'])
-
-        return {
-            'status':           b_status,
-            'l_dcm':            l_dcm,
-            'l_file':           l_file,
-            'str_path':         d_DCMfileRead['inputPath'],
-        }
 
     def inputReadCallback(self, *args, **kwargs):
         """
