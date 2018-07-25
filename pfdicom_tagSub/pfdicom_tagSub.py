@@ -274,7 +274,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         if self.b_json:
             self.ret_dump(d_ret, **kwargs)
 
-        self.dp.qprint('Returing from pfdicom_tagSub run...', level = 1)
+        self.dp.qprint('Returning from pfdicom_tagSub run...', level = 1)
 
         return d_ret
         
