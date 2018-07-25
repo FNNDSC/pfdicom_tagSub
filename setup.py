@@ -12,12 +12,12 @@ def readme():
 
 setup(
       name             =   'pfdicom_tagSub',
-      version          =   '1.2.10',
-      description      =   '(Python) Process DICOM tags and performs substitutions -- part of the pf* family.',
+      version          =   '1.2.12',
+      description      =   'Process DICOM tags and performs substitutions -- part of the pf* family.',
       long_description =   readme(),
       author           =   'FNNDSC',
       author_email     =   'dev@babymri.org',
-      url              =   'https://github.com/FNNDSC/med2image',
+      url              =   'https://github.com/FNNDSC/pfdicom_tagSub',
       packages         =   ['pfdicom_tagSub'],
       install_requires =   ['pfdicom'],
       #test_suite       =   'nose.collector',

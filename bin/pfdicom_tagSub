@@ -19,7 +19,7 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "1.2.10"
+str_version = "1.2.12"
 str_desc = Colors.CYAN + """
 
 
@@ -95,13 +95,13 @@ def synopsis(ab_shortOnly = False):
     description =  '''
     DESCRIPTION
 
-        pfdicom_tagSub replaces a set of <tag, value> pairs in a DICOM header
-        with values passed in a JSON structure.
+        ``pfdicom_tagSub`` replaces a set of ``<tag, value>`` pairs in a DICOM
+        header with values passed in a JSON structure.
 
-        The script accepts an <inputDir>, and then from this point an os.walk
-        is performed to extract all the subdirs. Each subdir is examined for
-        DICOM files (in the simplest sense by a file extension mapping) are 
-        passed to a processing method that reads and replaces specified 
+        The script accepts an ``<inputDir>``, and then from this point an 
+        ``os.walk()`` is performed to extract all the subdirs. Each subdir is 
+        examined for DICOM files (in the simplest sense by a file extension mapping) 
+        are passed to a processing method that reads and replaces specified 
         DICOM tags, saving the result in a corresponding directory and filename
         in the output tree.
 
