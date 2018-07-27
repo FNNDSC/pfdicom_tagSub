@@ -19,7 +19,7 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "1.2.14"
+str_version = "1.4.0"
 str_desc = Colors.CYAN + """
 
 
@@ -122,7 +122,23 @@ def synopsis(ab_shortOnly = False):
         <inputDir>.
 
         [-O|--outputDir <outputDir>]
-        The directory to contain all output files.
+        The output root directory that will contain a tree structure identical
+        to the input directory, and each "leaf" node will contain the analysis
+        results.
+
+        [--outputLeafDir <outputLeafDirFormat>]
+        If specified, will apply the <outputLeafDirFormat> to the output
+        directories containing data. This is useful to blanket describe
+        final output directories with some descriptive text, such as 
+        'anon' or 'preview'. 
+
+        This is a formatting spec, so 
+
+            --outputLeafDir 'preview-%%s'
+
+        where %%s is the original leaf directory node, will prefix each
+        final directory containing output with the text 'preview-' which
+        can be useful in describing some features of the output set.
 
         -F|--tagFile <JSONtagFile>
         Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
@@ -227,7 +243,11 @@ parser.add_argument("--printElapsedTime",
 parser.add_argument("--threads",
                     help    = "number of threads for innermost loop processing",
                     dest    = 'threads',
-                    default = "1")
+                    default = "0")
+parser.add_argument("--outputLeafDir",
+                    help    = "formatting spec for output leaf directory",
+                    dest    = 'outputLeafDir',
+                    default = "")
 parser.add_argument("-x", "--man",
                     help    = "man",
                     dest    = 'man',
@@ -276,6 +296,7 @@ pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
                         extension           = args.extension,
                         outputDir           = args.outputDir,
                         outputFileStem      = args.outputFileStem,
+                        outputLeafDir       = args.outputLeafDir,
                         tagFile             = args.tagFile,
                         tagStruct           = args.tagStruct,
                         threads             = args.threads,
