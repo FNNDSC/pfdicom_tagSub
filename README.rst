@@ -65,7 +65,9 @@ Command line arguments
         <inputDir>.
 
         [-O|--outputDir <outputDir>]
-        The directory to contain all output files.
+        The output root directory that will contain a tree structure identical
+        to the input directory, and each "leaf" node will contain the analysis
+        results.
 
         -F|--tagFile <JSONtagFile>
         Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
@@ -78,6 +80,20 @@ Command line arguments
         The output file stem to store data. This should *not* have a file
         extension, or rather, any "." in the name are considered part of 
         the stem and are *not* considered extensions.
+
+        [--outputLeafDir <outputLeafDirFormat>]
+        If specified, will apply the <outputLeafDirFormat> to the output
+        directories containing data. This is useful to blanket describe
+        final output directories with some descriptive text, such as 
+        'anon' or 'preview'. 
+
+        This is a formatting spec, so 
+
+            --outputLeafDir 'preview-%s'
+
+        where %s is the original leaf directory node, will prefix each
+        final directory containing output with the text 'preview-' which
+        can be useful in describing some features of the output set.
 
         [--threads <numThreads>]
         If specified, break the innermost analysis loop into <numThreads>
