@@ -25,24 +25,27 @@ Overview
 
 The script accepts an ``<inputDir>``, and then from this point an ``os.walk()`` is performed to extract all the subdirs. Each subdir is examined for DICOM files (in the simplest sense by a file extension mapping) are passed to a processing method that reads and replaces specified DICOM tags, saving the result in a corresponding directory and filename in the output tree.
 
-Dependencies
+Installation
 ------------
+
+Dependencies
+~~~~~~~~~~~~
 
 The following dependencies are installed on your host system/python3 virtual env (they will also be automatically installed if pulled from pypi):
 
--  pfmisc (various misc modules and classes for the pf* family of objects)
--  pftree (create a dictionary representation of a filesystem hierarchy)
--  pfdicom (handle underlying DICOM file reading)
+-  ``pfmisc`` (various misc modules and classes for the pf* family of objects)
+-  ``pftree`` (create a dictionary representation of a filesystem hierarchy)
+-  ``pfdicom`` (handle underlying DICOM file reading)
 
-Installation
-~~~~~~~~~~~~
+Using ``PyPI``
+~~~~~~~~~~~~~~
 
 The best method of installing this script and all of its dependencies is
 by fetching it from PyPI
 
 .. code:: bash
 
-        pip3 install pfdciom_tagSub
+        pip3 install pfdicom_tagSub
 
 Command line arguments
 ----------------------
@@ -121,7 +124,7 @@ Command line arguments
                     - write
                     
 Examples
-~~~~~~~~
+--------
 
 Perform a DICOM anonymization by processing specific tags:
 
