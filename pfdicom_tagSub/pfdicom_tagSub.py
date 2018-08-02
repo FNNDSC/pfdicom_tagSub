@@ -37,7 +37,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "1.4.4"
+        self.str_version                = "1.4.6"
 
         # Tags
         self.b_tagList                  = False
@@ -66,7 +66,9 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         """
 
         def tagStruct_process(str_tagStruct):
-            self.d_tagStruct            = json.loads(str_tagStruct)
+            self.str_tagStruct          = str_tagStruct
+            if len(self.str_tagStruct):
+                self.d_tagStruct        = json.loads(str_tagStruct)
 
         def tagFile_process(str_tagFile):
             self.str_tagFile            = str_tagFile
