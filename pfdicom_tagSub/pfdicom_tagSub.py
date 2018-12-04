@@ -37,7 +37,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "1.4.10"
+        self.str_version                = "1.4.12"
 
         # Tags
         self.b_tagList                  = False
@@ -81,7 +81,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             self.str_outputFileType     = str_outputFile
 
         # pudb.set_trace()
-        self.declare_selfvars()
+        pfdicom_tagSub.declare_selfvars(self)
 
         # Process some of the kwargs by the base class
         super().__init__(*args, **kwargs)
