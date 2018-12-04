@@ -37,7 +37,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "1.4.12"
+        self.str_version                = "1.4.14"
 
         # Tags
         self.b_tagList                  = False
@@ -54,15 +54,11 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
     def __init__(self, *args, **kwargs):
         """
-        A "base" class for all pfdicom objects. This class is typically never 
-        called/used directly; derived classes are used to provide actual end
-        functionality.
+        Constructor for pfdicom_tagSub. 
 
-        This class really only reads in a DICOM file, and populates some
-        internal convenience member variables.
-
-        Furthermore, this class does not have a concept nor concern about 
-        "output" relations.
+        Basically sets some derived class specific member variables (with
+        explicit call to *this* class) and then calls super class 
+        constructor.
         """
 
         def tagStruct_process(str_tagStruct):
