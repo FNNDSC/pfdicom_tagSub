@@ -134,20 +134,21 @@ Perform a DICOM anonymization by processing specific tags:
 .. code:: bash
 
         pfdicom_tagSub                                      \\
-                -I /var/www/html/normsmall -e dcm           \\
-                -O /var/www/html/anon                       \\
-                --tagStruct '
-                {
-                    "PatientName":          "anonymized",
-                    "PatientID":            "%_md5|7_PatientID",
-                    "AccessionNumber":      "%_md5|10_AccessionNumber",
-                    "PatientBirthDate":     "%_strmsk|******01_PatientBirthDate",
-                    "PhysiciansOfRecord":   "PhysiciansOfRecord",
-                    "RequestingPhysician":  "RequestingPhysician",
-                    "InstitutionAddress":   "InstitutionAddress",
-                    "InstitutionName":      "InstitutionName"
-                }
-                ' --threads 0 --printElapsedTime
+            -I /var/www/html/normsmall -e dcm               \\
+            -O /var/www/html/anon                           \\
+            --tagStruct '
+            {
+                "PatientName":              "anonymized",
+                "PatientID":                "%_md5|7_PatientID",
+                "AccessionNumber":          "%_md5|10_AccessionNumber",
+                "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",
+                "ReferringPhysiciansName":  "ReferringPhysiciansName",
+                "PhysiciansOfRecord":       "PhysiciansOfRecord",
+                "RequestingPhysician":      "RequestingPhysician",
+                "InstitutionAddress":       "InstitutionAddress",
+                "InstitutionName":          "InstitutionName"
+            }
+            ' --threads 0 --printElapsedTime
 
 which will output only at script conclusion and will log a JSON formatted string.
  
