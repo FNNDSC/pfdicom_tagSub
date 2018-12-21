@@ -142,7 +142,7 @@ Perform a DICOM anonymization by processing specific tags:
                 "PatientID":                "%_md5|7_PatientID",
                 "AccessionNumber":          "%_md5|10_AccessionNumber",
                 "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",
-                "ReferringPhysiciansName":  "ReferringPhysiciansName",
+                "ReferringPhysicianName":   "ReferringPhysicianName",
                 "PhysiciansOfRecord":       "PhysiciansOfRecord",
                 "RequestingPhysician":      "RequestingPhysician",
                 "InstitutionAddress":       "InstitutionAddress",
