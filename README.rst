@@ -138,7 +138,7 @@ Perform a DICOM anonymization by processing specific tags:
             -O /var/www/html/anon                           \\
             --tagStruct '
             {
-                "PatientName":              "anonymized",
+                "PatientName":              "%_name|patientID_PatientName",
                 "PatientID":                "%_md5|7_PatientID",
                 "AccessionNumber":          "%_md5|10_AccessionNumber",
                 "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",

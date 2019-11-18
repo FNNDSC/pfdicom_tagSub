@@ -37,7 +37,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "1.4.20"
+        self.str_version                = "1.4.22"
 
         # Tags
         self.b_tagList                  = False

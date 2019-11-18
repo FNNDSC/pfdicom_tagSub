@@ -19,7 +19,7 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "1.4.20"
+str_version = "1.4.22"
 str_desc = Colors.CYAN + """
 
 
@@ -85,7 +85,7 @@ def synopsis(ab_shortOnly = False):
             -O /var/www/html/anon                           \\
             --tagStruct '
             {
-                "PatientName":              "anonymized",
+                "PatientName":              "%_name|patientID_PatientName",
                 "PatientID":                "%_md5|7_PatientID",
                 "AccessionNumber":          "%_md5|10_AccessionNumber",
                 "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",
@@ -195,7 +195,7 @@ def synopsis(ab_shortOnly = False):
             -O /var/www/html/anon                           \\
             --tagStruct '
             {
-                "PatientName":              "anonymized",
+                "PatientName":              "%_name|patientID_PatientName",
                 "PatientID":                "%_md5|7_PatientID",
                 "AccessionNumber":          "%_md5|10_AccessionNumber",
                 "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",
@@ -306,8 +306,6 @@ if args.man or args.synopsis:
 if args.b_version:
     print("Version: %s" % str_version)
     sys.exit(1)
-
-# pudb.set_trace()
 
 pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
                         inputDir            = args.inputDir,
