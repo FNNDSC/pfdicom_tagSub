@@ -1,3 +1,7 @@
+# Turn off all logging for modules in this libary.
+import logging
+logging.disable(logging.CRITICAL)
+
 # System imports
 import      os
 import      getpass
@@ -19,7 +23,7 @@ import      pfdicom
 class pfdicom_tagSub(pfdicom.pfdicom):
     """
 
-    A class based on the 'pfdicom' infrastructure that extracts 
+    A class based on the 'pfdicom' infrastructure that extracts
     and processes DICOM tags according to several requirements.
 
     Powerful output formatting, such as image conversion to jpg/png
@@ -37,7 +41,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "1.4.22"
+        self.str_version                = "1.4.24"
 
         # Tags
         self.b_tagList                  = False
@@ -54,10 +58,10 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
     def __init__(self, *args, **kwargs):
         """
-        Constructor for pfdicom_tagSub. 
+        Constructor for pfdicom_tagSub.
 
         Basically sets some derived class specific member variables (with
-        explicit call to *this* class) and then calls super class 
+        explicit call to *this* class) and then calls super class
         constructor.
         """
 
@@ -83,13 +87,13 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         super().__init__(*args, **kwargs)
 
         for key, value in kwargs.items():
-            if key == "outputFileType":     outputFile_process(value) 
+            if key == "outputFileType":     outputFile_process(value)
             if key == 'tagFile':            tagFile_process(value)
             if key == 'tagStruct':          tagStruct_process(value)
             if key == 'verbosity':          self.verbosityLevel         = int(value)
 
         # Set logging
-        self.dp                        = pfmisc.debug(    
+        self.dp                        = pfmisc.debug(
                                             verbosity   = self.verbosityLevel,
                                             within      = self.__name__
                                             )
@@ -121,7 +125,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
         for f in l_file:
             self.dp.qprint("reading: %s/%s" % (str_path, f), level = 5)
-            d_DCMfileRead   = self.DICOMfile_read( 
+            d_DCMfileRead   = self.DICOMfile_read(
                                     file        = '%s/%s' % (str_path, f)
             )
             b_status        = b_status and d_DCMfileRead['status']
@@ -143,7 +147,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         """
         Callback for doing actual work on the read data.
 
-        This essentially means substituting tags in the 
+        This essentially means substituting tags in the
         passed list of dcm data sets.
         """
         d_DCMRead           = {}
@@ -187,7 +191,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         """
         Callback for saving outputs.
 
-        In order to be thread-safe, all directory/file 
+        In order to be thread-safe, all directory/file
         descriptors must be *absolute* and no chdir()'s
         must ever be called!
         """
@@ -224,7 +228,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
     def run(self, *args, **kwargs):
         """
-        The run method calls the base class run() to 
+        The run method calls the base class run() to
         perform initial probe and analysis.
 
         Then, it effectively calls the method to perform
@@ -236,7 +240,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         b_timerStart    = False
 
         self.dp.qprint(
-                "Starting pfdicom_tagSub run... (please be patient while running)", 
+                "Starting pfdicom_tagSub run... (please be patient while running)",
                 level = 1
                 )
 
@@ -248,7 +252,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
         # Run the base class, which probes the file tree
         # and does an initial analysis. Also suppress the
-        # base class from printing JSON results since those 
+        # base class from printing JSON results since those
         # will be printed by this class
         d_pfdicom       = super().run(
                                         JSONprint   = False,
@@ -276,4 +280,3 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         self.dp.qprint('Returning from pfdicom_tagSub run...', level = 1)
 
         return d_ret
-        
