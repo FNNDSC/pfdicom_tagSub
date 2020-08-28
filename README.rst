@@ -59,12 +59,12 @@ Command line arguments
         assumption that each <inputDir> contains a single DICOM series.
 
         -i|--inputFile <inputFile>
-        An optional <inputFile> specified relative to the <inputDir>. If 
-        specified, then do not perform a directory walk, but convert only 
+        An optional <inputFile> specified relative to the <inputDir>. If
+        specified, then do not perform a directory walk, but convert only
         this file.
 
         -e|--extension <DICOMextension>
-        An optional extension to filter the DICOM files of interest from the 
+        An optional extension to filter the DICOM files of interest from the
         <inputDir>.
 
         [-O|--outputDir <outputDir>]
@@ -81,16 +81,16 @@ Command line arguments
 
         -o|--outputFileStem <outputFileStem>
         The output file stem to store data. This should *not* have a file
-        extension, or rather, any "." in the name are considered part of 
+        extension, or rather, any "." in the name are considered part of
         the stem and are *not* considered extensions.
 
         [--outputLeafDir <outputLeafDirFormat>]
         If specified, will apply the <outputLeafDirFormat> to the output
         directories containing data. This is useful to blanket describe
-        final output directories with some descriptive text, such as 
-        'anon' or 'preview'. 
+        final output directories with some descriptive text, such as
+        'anon' or 'preview'.
 
-        This is a formatting spec, so 
+        This is a formatting spec, so
 
             --outputLeafDir 'preview-%s'
 
@@ -115,7 +115,7 @@ Command line arguments
         If specified, follow symbolic links.
 
         -v|--verbosity <level>
-        Set the app verbosity level. 
+        Set the app verbosity level.
 
             0: No internal output;
             1: Run start / stop output notification;
@@ -125,7 +125,7 @@ Command line arguments
                     - read
                     - analyze
                     - write
-                    
+
 Examples
 --------
 
@@ -133,9 +133,9 @@ Perform a DICOM anonymization by processing specific tags:
 
 .. code:: bash
 
-        pfdicom_tagSub                                      \\
-            -I /var/www/html/normsmall -e dcm               \\
-            -O /var/www/html/anon                           \\
+        pfdicom_tagSub                                      \
+            -I /var/www/html/normsmall -e dcm               \
+            -O /var/www/html/anon                           \
             --tagStruct '
             {
                 "PatientName":              "%_name|patientID_PatientName",
@@ -151,4 +151,4 @@ Perform a DICOM anonymization by processing specific tags:
             ' --threads 0 --printElapsedTime
 
 which will output only at script conclusion and will log a JSON formatted string.
- 
+
