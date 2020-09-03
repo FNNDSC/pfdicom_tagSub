@@ -21,7 +21,7 @@ Quick Overview
 Overview
 --------
 
-``pfdicom_tagSub`` replaces a set of ``<tag, value>`` pairs in a DICOM header with values passed in a JSON structure.
+``pfdicom_tagSub`` replaces a set of ``<tag, value>`` pairs in a DICOM header with values passed in a JSON structure. Individual DICOM tags can be explicitly referenced in the JSON structure, as well as a regular expression construct to capture all tags satisfying that expression. This allows for capturing all tags with a certain string pattern without needing to explicitly list every confirming tag.
 
 The script accepts an ``<inputDir>``, and then from this point an ``os.walk()`` is performed to extract all the subdirs. Each subdir is examined for DICOM files (in the simplest sense by a file extension mapping) are passed to a processing method that reads and replaces specified DICOM tags, saving the result in a corresponding directory and filename in the output tree.
 
@@ -133,22 +133,29 @@ Perform a DICOM anonymization by processing specific tags:
 
 .. code:: bash
 
-        pfdicom_tagSub                                      \
-            -I /var/www/html/normsmall -e dcm               \
-            -O /var/www/html/anon                           \
+        pfdicom_tagSub                                      \\
+            -e dcm                                          \\
+            -I /var/www/html/normsmall                      \\
+            -O /var/www/html/anon                           \\
             --tagStruct '
             {
                 "PatientName":              "%_name|patientID_PatientName",
                 "PatientID":                "%_md5|7_PatientID",
-                "AccessionNumber":          "%_md5|10_AccessionNumber",
+                "AccessionNumber":          "%_md5|8_AccessionNumber",
                 "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",
-                "ReferringPhysicianName":   "ReferringPhysicianName",
-                "PhysiciansOfRecord":       "PhysiciansOfRecord",
-                "RequestingPhysician":      "RequestingPhysician",
-                "InstitutionAddress":       "InstitutionAddress",
-                "InstitutionName":          "InstitutionName"
+                "re:.*hysician":            "%_md5|4_%tag",
+                "re:.*stituion":            "%tag",
+                "re:.*ddress":              "%tag"
             }
             ' --threads 0 --printElapsedTime
 
-which will output only at script conclusion and will log a JSON formatted string.
+will replace the explicitly named tags as shown:
 
+* the `PatientName` will be replaced with a Fake Name, seeded on the `PatientID`;
+* the `PatientID` will be replaced with the first 7 characters of an md5 hash of the `PatientID`;
+* the `AccessionNumber` will be replaced with the first 8 characters of an md5 hash of the `AccessionNumber`;
+* the `PatientBirthdate` with the final two characters, i.e. the day of birth, replaced with a `01` and preserving the other birthdate values;
+* any tags with the letters `hysician` will be replaced with the first 4 characters of the corresponding tag value md5 hash;
+* and finally, any tags with `stitution` and `ddress` in the tag name will have the corresponding value simply set to the tag name.
+
+_-30-_
