@@ -9,6 +9,7 @@ import      argparse
 import      json
 import      pprint
 import      csv
+import      re
 
 # Project specific imports
 import      pfmisc
@@ -41,7 +42,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "1.4.24"
+        self.str_version                = "2.0.0"
 
         # Tags
         self.b_tagList                  = False
@@ -156,8 +157,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         l_file              = []
         filesAnalyzed       = 0
 
-        # pudb.set_trace()
-
         for k, v in kwargs.items():
             if k == 'd_DCMRead':    d_DCMRead   = v
             if k == 'path':         str_path    = v
@@ -171,7 +170,8 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             str_path    = d_DCMRead['str_path']
             l_file      = d_DCMRead['l_file']
             self.dp.qprint("analyzing: %s" % l_file[filesAnalyzed], level = 5)
-            for k, v in self.d_tagStruct.items():
+            d_tagProcess        = self.tagStruct_process(d_DCMfileRead['d_DICOM'])
+            for k, v in d_tagProcess['d_tagNew'].items():
                 d_tagsInStruct  = self.tagsInString_process(d_DCMfileRead['d_DICOM'], v)
                 str_tagValue    = d_tagsInStruct['str_result']
                 setattr(d_DCMfileRead['d_DICOM']['dcm'], k, str_tagValue)
@@ -211,6 +211,53 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         return {
             'status':       True,
             'filesSaved':   filesSaved
+        }
+
+    def tagStruct_process(self, d_DICOM):
+        """
+        A method to "process" any regular expression in the passed 
+        tagStruct dictionary against a current batch of DICOM files.
+
+        This is designed to bulk replace all tags that resolve a bool
+        true in the tag space with the corresponding (possibly itself
+        expanded) value. For example,
+
+            "re:.*hysician":            "%_md5|4_%tag"
+
+        will tag any string with "hysician" in the tag with an md5 has
+        (first 4 chars) of the tag:
+
+        """
+
+        def tagValue_process(tag, value):
+            """
+            For a given tag and value, process the value component for a
+            special construct '%tag'. This construct in the value
+            string is replaced by the tag string itself.
+
+            If '%tag' is not in the value string, simply return the
+
+                                    {tag: value}
+
+            pair.
+            """
+            if "%tag" in value:
+                value       = value.replace("%tag", tag)
+            return {tag: value}
+
+        d_tagNew    : dict  = self.d_tagStruct.copy()
+        b_status    : bool  = False
+        for k, v in self.d_tagStruct.items():
+            if 're:' in k:
+                str_reg = k.split('re:')[1]
+                regex   = re.compile(r'%s' % str_reg)
+                for tag in d_DICOM['d_dicomSimple']:
+                    if bool(re.match(regex, tag)):
+                        d_tagNew.update(tagValue_process(tag, v))
+                        b_status    = True
+        return {
+            'status':       b_status,
+            'd_tagNew':     d_tagNew
         }
 
     def tags_substitute(self, **kwargs):
