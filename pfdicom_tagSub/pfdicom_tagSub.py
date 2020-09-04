@@ -232,17 +232,17 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         def tagValue_process(tag, value):
             """
             For a given tag and value, process the value component for a
-            special construct '%tag'. This construct in the value
+            special construct '#tag'. This construct in the value
             string is replaced by the tag string itself.
 
-            If '%tag' is not in the value string, simply return the
+            If '#tag' is not in the value string, simply return the
 
                                     {tag: value}
 
             pair.
             """
-            if "%tag" in value:
-                value       = value.replace("%tag", tag)
+            if "#tag" in value:
+                value       = value.replace("#tag", tag)
             return {tag: value}
 
         d_tagNew    : dict  = self.d_tagStruct.copy()
