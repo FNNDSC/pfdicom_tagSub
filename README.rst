@@ -21,7 +21,7 @@ Quick Overview
 Overview
 --------
 
-``pfdicom_tagSub`` replaces a set of ``<tag, value>`` pairs in a DICOM header with values passed in a JSON structure. Individual DICOM tags can be explicitly referenced in the JSON structure, as well as a regular expression construct to capture all tags satisfying that expression. This allows for capturing all tags with a certain string pattern without needing to explicitly list every confirming tag.
+``pfdicom_tagSub`` replaces a set of ``<tag, value>`` pairs in a DICOM header with values passed in a JSON structure. Individual DICOM tags can be explicitly referenced in the JSON structure, as well as a regular expression construct to capture all tags satisfying that expression (allowing for idiomatic bulk substitution of ``<tag, value>`` pairs).
 
 Tag regular expression constructs are ``python`` string expressions and are prefixed by ``"re:<pythonRegex>"``. For example, ``"re:.*hysician"`` will perform some substitution on all tags that contain the letters ``hysician``. The value substitution has access to a special lookup, ``#tag``, which is the current tag hit. It is possible to apply built in functions to the tag hit, for example ``md5`` hashing, using ``"%_md5|4_#tag"``,
 
