@@ -23,6 +23,27 @@ Overview
 
 ``pfdicom_tagSub`` replaces a set of ``<tag, value>`` pairs in a DICOM header with values passed in a JSON structure. Individual DICOM tags can be explicitly referenced in the JSON structure, as well as a regular expression construct to capture all tags satisfying that expression. This allows for capturing all tags with a certain string pattern without needing to explicitly list every confirming tag.
 
+Tag regular expression constructs are ``python`` string expressions and are prefixed by ``"re:<pythonRegex>"``. For example, ``"re:.*hysician"`` will perform some substitution on all tags that contain the letters ``hysician``. The value substitution has access to a special lookup, ``#tag`` which is the current tag hit. It is possible to apply built in functions to the tag hit, for exmaple ``md5`` hashing, using ``"%_md5|4_#tag"``,
+
+.. code:: javascript
+
+    {
+                "re:.*hysician":            "%_md5|4_#tag"
+    }
+
+will be expanded to
+
+.. code:: javascript
+
+    {
+        "PerformingPhysiciansName" :    "%_md5|4_PerformingPhysiciansName"
+        "PhysicianofRecord"        :    "%_md5|4_PhysicianofRecord"
+        "ReferringPhysiciansName"  :    "%_md5|4_ReferringPhysiciansName"
+        "RequestingPhysician"      :    "%_md5|4_RequestingPhysician"
+    }
+
+The tag regular expression construct allows for simple and powerful bulk substition of ``<tag, value>`` pairs.
+
 The script accepts an ``<inputDir>``, and then from this point an ``os.walk()`` is performed to extract all the subdirs. Each subdir is examined for DICOM files (in the simplest sense by a file extension mapping) are passed to a processing method that reads and replaces specified DICOM tags, saving the result in a corresponding directory and filename in the output tree.
 
 Installation
