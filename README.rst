@@ -151,12 +151,17 @@ Perform a DICOM anonymization by processing specific tags:
 
 will replace the explicitly named tags as shown:
 
-* the `PatientName` will be replaced with a Fake Name, seeded on the `PatientID`;
-* the `PatientID` will be replaced with the first 7 characters of an md5 hash of the `PatientID`;
-* the `AccessionNumber` will be replaced with the first 8 characters of an md5 hash of the `AccessionNumber`;
-* the `PatientBirthdate` with the final two characters, i.e. the day of birth, replaced with a `01` and preserving the other birthdate values;
-* any tags with the letters `hysician` will be replaced with the first 4 characters of the corresponding tag value md5 hash;
-* any tags with `stitution` and `ddress` substrings in the tag content will have the corresponding value simply set to the tag name.
+* the ``PatientName`` value will be replaced with a Fake Name, seeded on the ``PatientID``;
+
+* the ``PatientID`` value will be replaced with the first 7 characters of an md5 hash of the ``PatientID``;
+
+* the ``AccessionNumber``  value will be replaced with the first 8 characters of an md5 hash of the `AccessionNumber`;
+
+* the ``PatientBirthDate`` value will set the final two characters,i.e. the day of birth, to ``01`` and preserve the other birthdate values;
+
+* any tags with the substring ``hysician`` will have their values replaced with the first 4 characters of the corresponding tag value md5 hash;
+
+* any tags with ``stitution`` and ``ddress`` substrings in the tag contents will have the corresponding value simply set to the tag name.
 
 NOTE:
 
