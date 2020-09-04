@@ -19,7 +19,7 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "2.0.6"
+str_version = "2.0.8"
 str_desc = Colors.CYAN + """
 
         __    _ _                       _               _____       _     
@@ -111,8 +111,8 @@ def synopsis(ab_shortOnly = False):
 
         Individual DICOM tags can be explicitly referenced in the JSON structure,
         as well as a regular expression construct to capture all tags satisfying
-        that expression. This allows for capturing all tags with a certain string
-        pattern without needing to explicitly list every confirming tag.
+        that expression  (allowing for idiomatic bulk substitution of
+        ``<tag, value>`` pairs).
 
         Tag regular expression constructs are ``python`` string expressions and
         are prefixed by ``"re:<pythonRegex>"``. For example, ``"re:.*hysician"``

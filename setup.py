@@ -12,7 +12,7 @@ def readme():
 
 setup(
       name             =   'pfdicom_tagSub',
-      version          =   '2.0.6',
+      version          =   '2.0.8',
       description      =   'Process DICOM tags and performs substitutions -- part of the pf* family.',
       long_description =   readme(),
       author           =   'FNNDSC',
