@@ -19,7 +19,7 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "2.0.0"
+str_version = "2.0.2"
 str_desc = Colors.CYAN + """
 
         __    _ _                       _               _____       _     
@@ -71,25 +71,24 @@ def synopsis(ab_shortOnly = False):
 
     SYNOPSIS
 
-        pfdicom_tagSub                                      \\
-                     -I|--inputDir <inputDir>               \\
-                    [-i|--inputFile <inputFile>]            \\
-                    [-e|--extension <DICOMextension>]       \\
-                    [-F|--tagFile <tagFile>] |              \\
-                    [-T|--tagList <tagList>] |              \\
-                    [--threads <numThreads>]                \\
-                     -O|--outputDir <outputDir>             \\
-                    [-x|--man]                              \\
-                    [-y|--synopsis]                         \\
-                    [--followLinks]                         \\
+        pfdicom_tagSub                                                      \\
+                     -I|--inputDir <inputDir>                               \\
+                    [-i|--inputFile <inputFile>]                            \\
+                    [-e|--extension <DICOMextension>]                       \\
+                    [-F|--tagFile <tagFile>] | [-T|--tagStruct <tagStruct>] \\
+                    [--threads <numThreads>]                                \\
+                     -O|--outputDir <outputDir>                             \\
+                    [-x|--man]                                              \\
+                    [-y|--synopsis]                                         \\
+                    [--followLinks]                                         \\
                     [--json]
 
     BRIEF EXAMPLE
 
-        pfdicom_tagSub                                      \\
-            -e dcm                                          \\
-            -I /var/www/html/normsmall                      \\
-            -O /var/www/html/anon                           \\
+        pfdicom_tagSub                                                      \\
+            -e dcm                                                          \\
+            -I /var/www/html/normsmall                                      \\
+            -O /var/www/html/anon                                           \\
             --tagStruct '
             {
                 "PatientName":              "%_name|patientID_PatientName",
