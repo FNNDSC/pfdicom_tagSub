@@ -133,19 +133,19 @@ Perform a DICOM anonymization by processing specific tags:
 
 .. code:: bash
 
-        pfdicom_tagSub                                      \\
-            -e dcm                                          \\
-            -I /var/www/html/normsmall                      \\
-            -O /var/www/html/anon                           \\
+        pfdicom_tagSub                                      \
+            -e dcm                                          \
+            -I /var/www/html/normsmall                      \
+            -O /var/www/html/anon                           \
             --tagStruct '
             {
                 "PatientName":              "%_name|patientID_PatientName",
                 "PatientID":                "%_md5|7_PatientID",
                 "AccessionNumber":          "%_md5|8_AccessionNumber",
                 "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",
-                "re:.*hysician":            "%_md5|4_%tag",
-                "re:.*stituion":            "%tag",
-                "re:.*ddress":              "%tag"
+                "re:.*hysician":            "%_md5|4_#tag"
+                "re:.*stitution":           "#tag",
+                "re:.*ddress":              "#tag"
             }
             ' --threads 0 --printElapsedTime
 
@@ -156,6 +156,10 @@ will replace the explicitly named tags as shown:
 * the `AccessionNumber` will be replaced with the first 8 characters of an md5 hash of the `AccessionNumber`;
 * the `PatientBirthdate` with the final two characters, i.e. the day of birth, replaced with a `01` and preserving the other birthdate values;
 * any tags with the letters `hysician` will be replaced with the first 4 characters of the corresponding tag value md5 hash;
-* and finally, any tags with `stitution` and `ddress` in the tag name will have the corresponding value simply set to the tag name.
+* any tags with `stitution` and `ddress` substrings in the tag content will have the corresponding value simply set to the tag name.
+
+NOTE:
+
+Spelling matters! Especially with the substring bulk replace, please make sure that the substring has no typos, otherwise the target tags will most probably not be processed.
 
 _-30-_
