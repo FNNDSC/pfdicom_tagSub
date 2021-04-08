@@ -88,6 +88,12 @@ Command line arguments
         An optional extension to filter the DICOM files of interest from the
         <inputDir>.
 
+        [-f|--filefilter <fileFilter>]
+        A list of comma separated string filters to apply across the input file space
+
+        [-d|--dirFilter <dirFilter>]
+        A list of comma separated string filters to apply across the input dir space
+
         [-O|--outputDir <outputDir>]
         The output root directory that will contain a tree structure identical
         to the input directory, and each "leaf" node will contain the analysis
@@ -155,7 +161,7 @@ Perform a DICOM anonymization by processing specific tags:
 .. code:: bash
 
         pfdicom_tagSub                                      \
-            -e dcm                                          \
+            -f ".dcm"                                       \
             -I /var/www/html/normsmall                      \
             -O /var/www/html/anon                           \
             --tagStruct '

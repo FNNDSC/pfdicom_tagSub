@@ -75,6 +75,8 @@ def synopsis(ab_shortOnly = False):
                      -I|--inputDir <inputDir>                               \\
                     [-i|--inputFile <inputFile>]                            \\
                     [-e|--extension <DICOMextension>]                       \\
+                    [-f|--fileFilter <fileFilter>]                          \\
+                    [-d|--dirFilter <dirFilter>]                            \\
                     [-F|--tagFile <tagFile>] | [-T|--tagStruct <tagStruct>] \\
                     [--threads <numThreads>]                                \\
                      -O|--outputDir <outputDir>                             \\
@@ -86,7 +88,7 @@ def synopsis(ab_shortOnly = False):
     BRIEF EXAMPLE
 
         pfdicom_tagSub                                                      \\
-            -e dcm                                                          \\
+            -f ".dcm"                                                       \\
             -I /var/www/html/normsmall                                      \\
             -O /var/www/html/anon                                           \\
             --tagStruct '
@@ -161,6 +163,12 @@ def synopsis(ab_shortOnly = False):
         -e|--extension <DICOMextension>
         An optional extension to filter the DICOM files of interest from the
         <inputDir>.
+
+        [-f|--filefilter <fileFilter>]
+        A list of comma separated string filters to apply across the input file space
+
+        [-d|--dirFilter <dirFilter>]
+        A list of comma separated string filters to apply across the input dir space
 
         [-O|--outputDir <outputDir>]
         The output root directory that will contain a tree structure identical
