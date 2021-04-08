@@ -292,6 +292,14 @@ parser.add_argument("-e", "--extension",
                     help    = "DICOM file extension",
                     dest    = 'extension',
                     default = '')
+parser.add_argument("-f", "--fileFilter",
+                    help    = "a list of comma separated string filters to apply across the input file space",
+                    dest    = 'fileFilter',
+                    default = '')
+parser.add_argument("-d", "--dirFilter",
+                    help    = "a list of comma separated string filters to apply across the input dir space",
+                    dest    = 'dirFilter',
+                    default = '')
 parser.add_argument("-F", "--tagFile",
                     help    = "JSON formatted file containing tags to sub",
                     dest    = 'tagFile',
@@ -370,6 +378,8 @@ pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
                         inputDir            = args.inputDir,
                         inputFile           = args.inputFile,
                         extension           = args.extension,
+                        fileFilter          = args.fileFilter,
+                        dirFilter           = args.dirFilter,
                         outputDir           = args.outputDir,
                         outputFileStem      = args.outputFileStem,
                         outputLeafDir       = args.outputLeafDir,
