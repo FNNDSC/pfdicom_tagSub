@@ -1,0 +1,11 @@
+README.rst
+setup.py
+bin/pfdicom_tagSub
+pfdicom_tagSub/__init__.py
+pfdicom_tagSub/pfdicom_tagSub.py
+pfdicom_tagSub.egg-info/PKG-INFO
+pfdicom_tagSub.egg-info/SOURCES.txt
+pfdicom_tagSub.egg-info/dependency_links.txt
+pfdicom_tagSub.egg-info/not-zip-safe
+pfdicom_tagSub.egg-info/requires.txt
+pfdicom_tagSub.egg-info/top_level.txt
