@@ -76,6 +76,7 @@ def synopsis(ab_shortOnly = False):
                     [-i|--inputFile <inputFile>]                            \\
                     [-e|--extension <DICOMextension>]                       \\
                     [-F|--tagFile <tagFile>] | [-T|--tagStruct <tagStruct>] \\
+                    [-s|--splitToken <token>] & [-n|--tagInfo <tagInfo>]    \\
                     [--threads <numThreads>]                                \\
                      -O|--outputDir <outputDir>                             \\
                     [-x|--man]                                              \\
@@ -188,6 +189,14 @@ def synopsis(ab_shortOnly = False):
         Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
         passed directly in the command line.
 
+        -I|--tagInfo <delimited_parameters>
+    	A token delimited tag structure that saves you from the complexity
+    	of creating a well formed JSON structure
+    	
+        -s|--splitToken <split_token>
+        The token on which to split the <delimited_parameters> string.
+        Default is '++'
+        
         -o|--outputFileStem <outputFileStem>
         The output file stem to store data. This should *not* have a file
         extension, or rather, any "." in the name are considered part of
@@ -300,6 +309,14 @@ parser.add_argument("-T", "--tagStruct",
                     help    = "JSON formatted tag sub struct",
                     dest    = 'tagStruct',
                     default = '')
+parser.add_argument("-n", "--tagInfo",
+                    help        = "A custom delimited tag sub struct",
+                    dest        = 'tagInfo',
+                    default     = '')
+parser.add_argument("-s","--splitToken",
+                    help        = "Expression on which to split the <delimited_tag_info>",
+                    dest        = 'splitToken',
+                    default     = "++")
 parser.add_argument("-o", "--outputFileStem",
                     help    = "output file",
                     default = "",
@@ -375,6 +392,8 @@ pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
                         outputLeafDir       = args.outputLeafDir,
                         tagFile             = args.tagFile,
                         tagStruct           = args.tagStruct,
+                        splitToken          = args.splitToken,
+                        tagInfo             = args.tagInfo,
                         threads             = args.threads,
                         followLinks         = args.followLinks,
                         verbosity           = args.verbosity,

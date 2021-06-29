@@ -42,13 +42,15 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "2.0.8"
+        self.str_version                = "2.0.10"
 
         # Tags
         self.b_tagList                  = False
         self.b_tagFile                  = False
         self.str_tagStruct              = ''
         self.str_tagFile                = ''
+        self.str_tagInfo                = ''
+        self.str_splitToken             = ''
         self.d_tagStruct                = {}
 
         self.dp                         = None
@@ -70,6 +72,26 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             self.str_tagStruct          = str_tagStruct
             if len(self.str_tagStruct):
                 self.d_tagStruct        = json.loads(str_tagStruct)
+                
+        def set_splitToken(str_splitToken):
+            self.str_splitToken         = str_splitToken
+                     
+        def tagInfo_to_tagStruct(str_tagInfo):
+            self.str_tagInfo            = str_tagInfo
+            
+            if self.str_tagInfo and self.str_tagStruct:
+                raise ValueError("You must specify either tagStruct or tagInfo, not both")
+            l_s = self.str_tagInfo.split(self.str_splitToken)
+            d ={}
+            try:
+                for f in l_s:
+                    ss = f.split(':')
+                    d[ss[0]] = ss[1]
+            except:
+                print ('Incorrect tag info specified')
+                return
+            
+            self.d_tagStruct            = json.loads(json.dumps(dict(d)))
 
         def tagFile_process(str_tagFile):
             self.str_tagFile            = str_tagFile
@@ -91,6 +113,8 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             if key == "outputFileType":     outputFile_process(value)
             if key == 'tagFile':            tagFile_process(value)
             if key == 'tagStruct':          tagStruct_process(value)
+            if key == 'splitToken':         set_splitToken(value)
+            if key == 'tagInfo':            tagInfo_to_tagStruct(value)
             if key == 'verbosity':          self.verbosityLevel         = int(value)
 
         # Set logging
@@ -244,7 +268,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             if "#tag" in value:
                 value       = value.replace("#tag", tag)
             return {tag: value}
-
         d_tagNew    : dict  = self.d_tagStruct.copy()
         b_status    : bool  = False
         for k, v in self.d_tagStruct.items():
