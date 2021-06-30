@@ -73,37 +73,24 @@ Command line arguments
 
 .. code:: html
 
-
         -I|--inputDir <inputDir>
         Input DICOM directory to examine. By default, the first file in this
         directory is examined for its tag information. There is an implicit
         assumption that each <inputDir> contains a single DICOM series.
 
-        -i|--inputFile <inputFile>
+        [-i|--inputFile <inputFile>]
         An optional <inputFile> specified relative to the <inputDir>. If
         specified, then do not perform a directory walk, but convert only
         this file.
 
-        -e|--extension <DICOMextension>
+        [-e|--extension <DICOMextension>]
         An optional extension to filter the DICOM files of interest from the
         <inputDir>.
 
-        [-O|--outputDir <outputDir>]
+        -O|--outputDir <outputDir>
         The output root directory that will contain a tree structure identical
         to the input directory, and each "leaf" node will contain the analysis
         results.
-
-        -F|--tagFile <JSONtagFile>
-        Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
-
-        -T|--tagStruct <JSONtagStructure>
-        Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
-        passed directly in the command line.
-
-        -o|--outputFileStem <outputFileStem>
-        The output file stem to store data. This should *not* have a file
-        extension, or rather, any "." in the name are considered part of
-        the stem and are *not* considered extensions.
 
         [--outputLeafDir <outputLeafDirFormat>]
         If specified, will apply the <outputLeafDirFormat> to the output
@@ -115,9 +102,55 @@ Command line arguments
 
             --outputLeafDir 'preview-%s'
 
-        where %s is the original leaf directory node, will prefix each
+        where %%s is the original leaf directory node, will prefix each
         final directory containing output with the text 'preview-' which
         can be useful in describing some features of the output set.
+
+        [-F|--tagFile <JSONtagFile>]
+        Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
+
+        [-T|--tagStruct <JSONtagStructure>]
+        Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
+        string passed directly in the command line. Note that sometimes protecting
+        a JSON string can be tricky, especially when used in scripts or as variable
+        expansions. If the JSON string is problematic, use the [--tagInfo <string>]
+        instead.
+
+        [--tagInfo <delimited_parameters>]
+    	A token delimited string that is reconstructed into a JSON structure by the
+        script. This is often useful if the [--tagStruict] JSON string is hard to
+        parse in scripts and variable passing within scripts. The format of this
+        string is:
+
+                "<tag1><splitKeyValue><value1><split_token><tag2><splitKeyValue><value2>"
+
+        for example:
+
+                --splitToken ","
+                --splitKeyValue ':'
+                --tagInfo "PatientName:anon,PatientID:%_md5|7_PatientID"
+
+        or more complexly (esp if the ':' is part of the key):
+
+                --splitToken "++"
+                --splitKeyValue "="
+                --tagInfo "PatientBirthDate = %_strmsk|******01_PatientBirthDate ++
+                           re:.*hysician"   = %_md5|4_#tag"
+
+
+        [-s|--splitToken <split_token>]
+        The token on which to split the <delimited_parameters> string.
+        Default is '++'.
+
+        [-k|--splitKeyValue <keyValueSplit>]
+        The token on which to split the <key> <value> pair. Default is ':'
+        but this can be problematic if the <key> itself has a ':' (for example
+        in the regular expression expansion).
+
+        [-o|--outputFileStem <outputFileStem>]
+        The output file stem to store data. This should *not* have a file
+        extension, or rather, any "." chars. Dots in the name are considered
+        part of the stem and are *not* considered extensions.
 
         [--threads <numThreads>]
         If specified, break the innermost analysis loop into <numThreads>
@@ -135,7 +168,7 @@ Command line arguments
         [--followLinks]
         If specified, follow symbolic links.
 
-        -v|--verbosity <level>
+        [-v|--verbosity <level>]
         Set the app verbosity level.
 
             0: No internal output;
@@ -146,6 +179,7 @@ Command line arguments
                     - read
                     - analyze
                     - write
+
 
 Examples
 --------
@@ -164,28 +198,61 @@ Perform a DICOM anonymization by processing specific tags:
                 "PatientID":                "%_md5|7_PatientID",
                 "AccessionNumber":          "%_md5|8_AccessionNumber",
                 "PatientBirthDate":         "%_strmsk|******01_PatientBirthDate",
-                "re:.*hysician":            "%_md5|4_#tag"
+                "re:.*hysician":            "%_md5|4_#tag",
                 "re:.*stitution":           "#tag",
                 "re:.*ddress":              "#tag"
             }
             ' --threads 0 --printElapsedTime
 
+-- OR equivalently --
+
+.. code:: bash
+
+        pfdicom_tagSub                                      \
+            -e dcm                                          \
+            -I /var/www/html/normsmall                      \
+            -O /var/www/html/anon                           \
+            --splitToken ","                                \
+            --splitKeyValue "="                             \
+            --tagInfo '
+                PatientName         =  %_name|patientID_PatientName,
+                PatientID           =  %_md5|7_PatientID,
+                AccessionNumber     =  %_md5|8_AccessionNumber,
+                PatientBirthDate    =  %_strmsk|******01_PatientBirthDate,
+                re:.*hysician       =  %_md5|4_#tag,
+                re:.*stitution      =  #tag,
+                re:.*ddress         =  #tag
+            ' --threads 0 --printElapsedTime
+
 will replace the explicitly named tags as shown:
 
-* the ``PatientName`` value will be replaced with a Fake Name, seeded on the ``PatientID``;
+* the ``PatientName`` value will be replaced with a Fake Name,
+  seeded on the ``PatientID``;
 
-* the ``PatientID`` value will be replaced with the first 7 characters of an md5 hash of the ``PatientID``;
+* the ``PatientID`` value will be replaced with the first 7 characters
+  of an md5 hash of the ``PatientID``;
 
-* the ``AccessionNumber``  value will be replaced with the first 8 characters of an md5 hash of the `AccessionNumber`;
+* the ``AccessionNumber``  value will be replaced with the first 8
+  characters of an md5 hash of the `AccessionNumber`;
 
-* the ``PatientBirthDate`` value will set the final two characters,i.e. the day of birth, to ``01`` and preserve the other birthdate values;
+* the ``PatientBirthDate`` value will set the final two characters,
+  i.e. the day of birth, to ``01`` and preserve the other birthdate
+  values;
 
-* any tags with the substring ``hysician`` will have their values replaced with the first 4 characters of the corresponding tag value md5 hash;
+* any tags with the substring ``hysician`` will have their values
+  replaced with the first 4 characters of the corresponding tag value
+  md5 hash;
 
-* any tags with ``stitution`` and ``ddress`` substrings in the tag contents will have the corresponding value simply set to the tag name.
+* any tags with ``stitution`` and ``ddress`` substrings in the tag
+  contents will have the corresponding value simply set to the tag
+  name.
 
 NOTE:
+-----
 
-Spelling matters! Especially with the substring bulk replace, please make sure that the substring has no typos, otherwise the target tags will most probably not be processed.
+Spelling matters! Especially with the substring bulk replace, please
+make sure that the substring has no typos, otherwise the target tags
+will most probably not be processed.
+
 
 _-30-_
