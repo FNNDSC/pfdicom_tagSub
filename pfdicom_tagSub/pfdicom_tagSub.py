@@ -42,7 +42,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         #
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "2.0.12"
+        self.str_version                = "2.0.14"
 
         # Tags
         self.b_tagList                  = False
@@ -51,6 +51,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         self.str_tagFile                = ''
         self.str_tagInfo                = ''
         self.str_splitToken             = ''
+        self.str_splitKeyValue          = ''
         self.d_tagStruct                = {}
 
         self.dp                         = None
@@ -72,26 +73,38 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             self.str_tagStruct          = str_tagStruct
             if len(self.str_tagStruct):
                 self.d_tagStruct        = json.loads(str_tagStruct)
-                
+
         def set_splitToken(str_splitToken):
             self.str_splitToken         = str_splitToken
-                     
+
         def tagInfo_to_tagStruct(str_tagInfo):
             self.str_tagInfo            = str_tagInfo
-            
+
+            lstrip          = lambda l : [x.strip() for x in l]
+
             if self.str_tagInfo and self.str_tagStruct:
                 raise ValueError("You must specify either tagStruct or tagInfo, not both")
-            l_s = self.str_tagInfo.split(self.str_splitToken)
-            d ={}
+
+            # Split the string into key/value components
+            l_sdirty    :  list = self.str_tagInfo.split(self.str_splitToken)
+
+            # Now, strip any leading and trailing spaces from list elements
+            l_s         : list  = lstrip(l_sdirty)
+            d           : dict  = {}
+
+            l_kvdirty   : list  = []
+            l_kv        : list  = []
             try:
                 for f in l_s:
-                    ss = f.split(':')
-                    d[ss[0]] = ss[1]
+                    l_kvdirty   = f.split(self.str_splitKeyValue)
+                    l_kv        = lstrip(l_kvdirty)
+                    d[l_kv[0]]  = l_kv[1]
             except:
                 print ('Incorrect tag info specified')
                 return
-            
-            self.d_tagStruct            = json.loads(json.dumps(dict(d)))
+
+            # self.d_tagStruct            = json.loads(json.dumps(dict(d)))
+            self.d_tagStruct    = d.copy()
 
         def tagFile_process(str_tagFile):
             self.str_tagFile            = str_tagFile
@@ -115,6 +128,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             if key == 'tagStruct':          tagStruct_process(value)
             if key == 'splitToken':         set_splitToken(value)
             if key == 'tagInfo':            tagInfo_to_tagStruct(value)
+            if key == 'splitKeyValue':      self.str_splitKeyValue      = value
             if key == 'verbosity':          self.verbosityLevel         = int(value)
 
         # Set logging
@@ -239,7 +253,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
     def tagStruct_process(self, d_DICOM):
         """
-        A method to "process" any regular expression in the passed 
+        A method to "process" any regular expression in the passed
         tagStruct dictionary against a current batch of DICOM files.
 
         This is designed to bulk replace all tags that resolve a bool
