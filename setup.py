@@ -12,7 +12,7 @@ def readme():
 
 setup(
       name             =   'pfdicom_tagSub',
-      version          =   '2.0.16',
+      version          =   '3.0.0',
       description      =   'Process DICOM tags and performs substitutions -- part of the pf* family.',
       long_description =   readme(),
       author           =   'FNNDSC',
@@ -20,9 +20,11 @@ setup(
       url              =   'https://github.com/FNNDSC/pfdicom_tagSub',
       packages         =   ['pfdicom_tagSub'],
       install_requires =   ['pfdicom'],
-      #test_suite       =   'nose.collector',
-      #tests_require    =   ['nose'],
-      scripts          =   ['bin/pfdicom_tagSub'],
+      entry_points={
+          'console_scripts': [
+              'pfdicom_tagSub = pfdicom_tagSub.__main__:main'
+          ]
+      },
       license          =   'MIT',
       zip_safe         =   False
 )
