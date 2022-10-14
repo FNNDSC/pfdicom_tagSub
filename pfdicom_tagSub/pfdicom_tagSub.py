@@ -18,8 +18,14 @@ from        pfmisc              import  other
 from        pfmisc              import  error
 
 import      pudb
-import      pftree
-import      pfdicom
+# import      pftree
+# import      pfdicom
+from        pfdicom             import  pfdicom
+
+try:
+    from    .                   import __name__, __version__
+except:
+    from    __init__            import __name__, __version__
 
 class pfdicom_tagSub(pfdicom.pfdicom):
     """
@@ -41,8 +47,8 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         # Object desc block
         #
         self.str_desc                   = ''
-        self.__name__                   = "pfdicom_tagSub"
-        self.str_version                = "2.0.16"
+        self.__name__                   = __name__
+        self.str_version                = __version__
 
         # Tags
         self.b_tagList                  = False
@@ -79,32 +85,31 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
         def tagInfo_to_tagStruct(str_tagInfo):
             self.str_tagInfo            = str_tagInfo
+            if self.str_tagInfo:
+                lstrip          = lambda l : [x.strip() for x in l]
 
-            lstrip          = lambda l : [x.strip() for x in l]
+                if self.str_tagInfo and self.str_tagStruct:
+                    raise ValueError("You must specify either tagStruct or tagInfo, not both")
 
-            if self.str_tagInfo and self.str_tagStruct:
-                raise ValueError("You must specify either tagStruct or tagInfo, not both")
+                # Split the string into key/value components
+                l_sdirty    :  list = self.str_tagInfo.split(self.str_splitToken)
 
-            # Split the string into key/value components
-            l_sdirty    :  list = self.str_tagInfo.split(self.str_splitToken)
+                # Now, strip any leading and trailing spaces from list elements
+                l_s         : list  = lstrip(l_sdirty)
+                d           : dict  = {}
 
-            # Now, strip any leading and trailing spaces from list elements
-            l_s         : list  = lstrip(l_sdirty)
-            d           : dict  = {}
+                l_kvdirty   : list  = []
+                l_kv        : list  = []
+                try:
+                    for f in l_s:
+                        l_kvdirty   = f.split(self.str_splitKeyValue)
+                        l_kv        = lstrip(l_kvdirty)
+                        d[l_kv[0]]  = l_kv[1]
+                except:
+                    print ('Incorrect tag info specified')
+                    return
 
-            l_kvdirty   : list  = []
-            l_kv        : list  = []
-            try:
-                for f in l_s:
-                    l_kvdirty   = f.split(self.str_splitKeyValue)
-                    l_kv        = lstrip(l_kvdirty)
-                    d[l_kv[0]]  = l_kv[1]
-            except:
-                print ('Incorrect tag info specified')
-                return
-
-            # self.d_tagStruct            = json.loads(json.dumps(dict(d)))
-            self.d_tagStruct    = d.copy()
+                self.d_tagStruct    = d.copy()
 
         def tagFile_process(str_tagFile):
             self.str_tagFile            = str_tagFile
@@ -116,8 +121,11 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         def outputFile_process(str_outputFile):
             self.str_outputFileType     = str_outputFile
 
-        # pudb.set_trace()
         pfdicom_tagSub.declare_selfvars(self)
+        self.args                       = args[0]
+        self.str_desc                   = self.args['str_desc']
+        if len(self.args):
+            kwargs  = {**self.args, **kwargs}
 
         # Process some of the kwargs by the base class
         super().__init__(*args, **kwargs)
@@ -127,9 +135,10 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             if key == 'tagFile':            tagFile_process(value)
             if key == 'tagStruct':          tagStruct_process(value)
             if key == 'splitToken':         set_splitToken(value)
-            if key == 'tagInfo':            tagInfo_to_tagStruct(value)
             if key == 'splitKeyValue':      self.str_splitKeyValue      = value
             if key == 'verbosity':          self.verbosityLevel         = int(value)
+
+        if self.args['tagInfo']:            tagInfo_to_tagStruct(self.args['tagInfo'])
 
         # Set logging
         self.dp                        = pfmisc.debug(
@@ -310,6 +319,22 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         )
         return d_tagSub
 
+    def ret_jdump(self, d_ret, **kwargs):
+        """
+        JSON print results to console (or caller)
+        """
+        b_print     = True
+        for k, v in kwargs.items():
+            if k == 'JSONprint':    b_print     = bool(v)
+        if b_print:
+            print(
+                json.dumps(
+                    d_ret,
+                    indent      = 4,
+                    sort_keys   = True
+                )
+        )
+
     def run(self, *args, **kwargs):
         """
         The run method calls the base class run() to
@@ -319,9 +344,12 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         the DICOM tag substitution.
 
         """
-        b_status        = True
-        d_tagSub        = {}
-        b_timerStart    = False
+        b_status            : bool  = True
+        b_timerStart        : bool  = False
+        d_pfdicomRun        : dict  = {}
+        b_JSONprint         : bool  = True
+        d_treeHone          : dict  = {}
+        d_tagSub            : dict  = {}
 
         self.dp.qprint(
                 "Starting pfdicom_tagSub run... (please be patient while running)",
@@ -330,6 +358,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
 
         for k, v in kwargs.items():
             if k == 'timerStart':   b_timerStart    = bool(v)
+            if k == 'JSONprint':    b_JSONprint     = bool(v)
 
         if b_timerStart:
             other.tic()
@@ -338,22 +367,19 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         # and does an initial analysis. Also suppress the
         # base class from printing JSON results since those
         # will be printed by this class
-        d_pfdicom       = super().run(
+        d_pfdicomRun    = super().run(
                                         JSONprint   = False,
                                         timerStart  = False
                                     )
 
-        if d_pfdicom['status']:
-            str_startDir    = os.getcwd()
-            os.chdir(self.str_inputDir)
+        if d_pfdicomRun['status']:
             if b_status:
-                d_tagSub    = self.tags_substitute()
-                b_status    = b_status and d_tagSub['status']
-            os.chdir(str_startDir)
+                d_tagSub        = self.tags_substitute()
+                b_status        = d_tagSub['status']
 
         d_ret = {
             'status':       b_status,
-            'd_pfdicom':    d_pfdicom,
+            'd_pfdicom':    d_pfdicomRun,
             'd_tagSub':     d_tagSub,
             'runTime':      other.toc()
         }
