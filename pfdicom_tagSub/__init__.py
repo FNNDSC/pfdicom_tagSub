@@ -1,4 +1,4 @@
-try:
-    from .pfdicom_tagSub    import pfdicom_tagSub
-except:
-    from pfdicom_tagSub     import pfdicom_tagSub
+from importlib.metadata import Distribution
+
+__pkg       = Distribution.from_name(__package__)
+__version__ = __pkg.version
