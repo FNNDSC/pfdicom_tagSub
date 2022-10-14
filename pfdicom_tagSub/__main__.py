@@ -8,9 +8,16 @@
 #
 
 import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../pfdicom_tagSub'))
+# sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../pfdicom_tagSub'))
 
-import  pfdicom_tagSub
+try:
+    from    .               import pfdicom_tagSub
+    from    .               import __pkg, __version__
+except:
+    from pfdicom_tagSub     import pfdicom_tagSub
+    from __init__           import __pkg, __version__
+
+
 from    argparse            import RawTextHelpFormatter
 from    argparse            import ArgumentParser
 import  pudb
@@ -19,7 +26,11 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "2.0.16"
+import  pfdicom
+from    pfdicom.__main__    import package_CLIfull as pfdicom_CLIfull
+from    pfdicom.__main__    import package_argsSynopsisFull as pfdicom_argSynopsis
+from    pfdicom.__main__    import parser as pfdicom_parser
+
 str_desc = Colors.CYAN + """
 
             __    _ _                       _               _____       _
@@ -43,7 +54,7 @@ str_desc = Colors.CYAN + """
         Basically a DICOM anonymizer.
 
                              -- version """ + \
-             Colors.YELLOW + str_version + Colors.CYAN + """ --
+             Colors.YELLOW + __version__ + Colors.CYAN + """ --
 
         'pfdicom_tagSub' is a customizable and friendly DICOM tag substitutor.
         As part of the "pf*" suite of applications, it is geared to IO as
@@ -62,37 +73,73 @@ str_desc = Colors.CYAN + """
 
 """ + Colors.NO_COLOUR
 
+packageCLI_self     = '''
+        [--tagStruct <tagStruct>]                                               \\
+        [--tagInfo <tagInfo>]                                                   \\
+        [--splitToken <token>]                                                  \\
+        [--splitKey <keySplit>]                                                 \\'''
+
+package_argsSynopsisSelf = """
+        [-T|--tagStruct <JSONtagStructure>]
+        Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
+        string passed directly in the command line. Note that sometimes protecting
+        a JSON string can be tricky, especially when used in scripts or as variable
+        expansions. If the JSON string is problematic, use the [--tagInfo <string>]
+        instead.
+
+        [--tagInfo <delimited_parameters>]
+        A token delimited string that is reconstructed into a JSON structure by the
+        script. This is often useful if the [--tagStruict] JSON string is hard to
+        parse in scripts and variable passing within scripts. The format of this
+        string is:
+
+        "<tag1><splitKeyValue><value1><split_token><tag2><splitKeyValue><value2>"
+
+        for example:
+
+                --splitToken ","                                                \\
+                --splitKeyValue ':'                                             \\
+                --tagInfo "PatientName:anon,PatientID:%_md5|7_PatientID"
+
+        or more complexly (esp if the ':' is part of the key):
+
+                --splitToken "++"                                               \\
+                --splitKeyValue "="                                             \\
+                --tagInfo "PatientBirthDate = %_strmsk|******01_PatientBirthDate ++
+                           re:.*hysician"   = %_md5|4_#tag"
+
+
+        [-s|--splitToken <split_token>]
+        The token on which to split the <delimited_parameters> string.
+        Default is '++'. Take care with how this is quoted, esp as regards padded
+        spaces!
+
+        [-k|--splitKeyValue <keyValueSplit>]
+        The token on which to split the <key> <value> pair. Default is ':'
+        but this can be problematic if the <key> itself has a ':' (for example
+        in the regular expression expansion).
+"""
+
+package_CLIfull             = packageCLI_self       + pfdicom_CLIfull
+package_argsSynopsisFull    = pfdicom_argSynopsis   + package_argsSynopsisSelf
+
 def synopsis(ab_shortOnly = False):
     scriptName = os.path.basename(sys.argv[0])
     shortSynopsis =  """
     NAME
 
-	    pfdicom_tagSub
+        pfdicom_tagSub
 
     SYNOPSIS
 
-        pfdicom_tagSub                                                      \\
-                     -I|--inputDir <inputDir>                               \\
-                     -O|--outputDir <outputDir>                             \\
-                    [-i|--inputFile <inputFile>]                            \\
-                    [-e|--extension <DICOMextension>]                       \\
-                    [-F|--tagFile <tagFile>] | [-T|--tagStruct <tagStruct>] \\
-                    [-n|--tagInfo <tagInfo>]                                \\
-                    [-s|--splitToken <token>]  [-k|--splitKey <keySplit>]   \\
-                    [--threads <numThreads>]                                \\
-                    [-o|--outputFileStem <outputFileStem>]                  \\
-                    [-x|--man]                                              \\
-                    [-y|--synopsis]                                         \\
-                    [--followLinks]                                         \\
-                    [-v|--verbosity <level>]                                \\
-                    [--json]
+        pfdicom_tagSub \ """ + package_CLIfull + """
 
     BRIEF EXAMPLE
 
-        pfdicom_tagSub                                                      \\
-            -e dcm                                                          \\
-            -I /var/www/html/normsmall                                      \\
-            -O /var/www/html/anon                                           \\
+        pfdicom_tagSub                                                          \\
+            --fileFilter dcm                                                    \\
+            --inputDir /var/www/html/normsmall                                  \\
+            --outputDir /var/www/html/anon                                      \\
             --tagStruct '
             {
                 "PatientName":              "%_name|patientID_PatientName",
@@ -150,123 +197,17 @@ def synopsis(ab_shortOnly = False):
         DICOM tags, saving the result in a corresponding directory and filename
         in the output tree.
 
-    ARGS
+    ARGS ''' + package_argsSynopsisFull + '''
 
-        -I|--inputDir <inputDir>
-        Input DICOM directory to examine. By default, the first file in this
-        directory is examined for its tag information. There is an implicit
-        assumption that each <inputDir> contains a single DICOM series.
-
-        [-i|--inputFile <inputFile>]
-        An optional <inputFile> specified relative to the <inputDir>. If
-        specified, then do not perform a directory walk, but convert only
-        this file.
-
-        [-e|--extension <DICOMextension>]
-        An optional extension to filter the DICOM files of interest from the
-        <inputDir>.
-
-        -O|--outputDir <outputDir>
-        The output root directory that will contain a tree structure identical
-        to the input directory, and each "leaf" node will contain the analysis
-        results.
-
-        [--outputLeafDir <outputLeafDirFormat>]
-        If specified, will apply the <outputLeafDirFormat> to the output
-        directories containing data. This is useful to blanket describe
-        final output directories with some descriptive text, such as
-        'anon' or 'preview'.
-
-        This is a formatting spec, so
-
-            --outputLeafDir 'preview-%%s'
-
-        where %%s is the original leaf directory node, will prefix each
-        final directory containing output with the text 'preview-' which
-        can be useful in describing some features of the output set.
-
-        [-F|--tagFile <JSONtagFile>]
-        Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
-
-        [-T|--tagStruct <JSONtagStructure>]
-        Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
-        string passed directly in the command line. Note that sometimes protecting
-        a JSON string can be tricky, especially when used in scripts or as variable
-        expansions. If the JSON string is problematic, use the [--tagInfo <string>]
-        instead.
-
-        [--tagInfo <delimited_parameters>]
-    	A token delimited string that is reconstructed into a JSON structure by the
-        script. This is often useful if the [--tagStruict] JSON string is hard to
-        parse in scripts and variable passing within scripts. The format of this
-        string is:
-
-                "<tag1><splitKeyValue><value1><split_token><tag2><splitKeyValue><value2>"
-
-        for example:
-
-                --splitToken ","
-                --splitKeyValue ':'
-                --tagInfo "PatientName:anon,PatientID:%_md5|7_PatientID"
-
-        or more complexly (esp if the ':' is part of the key):
-
-                --splitToken "++"
-                --splitKeyValue "="
-                --tagInfo "PatientBirthDate = %_strmsk|******01_PatientBirthDate ++
-                           re:.*hysician"   = %_md5|4_#tag"
-
-
-        [-s|--splitToken <split_token>]
-        The token on which to split the <delimited_parameters> string.
-        Default is '++'.
-
-        [-k|--splitKeyValue <keyValueSplit>]
-        The token on which to split the <key> <value> pair. Default is ':'
-        but this can be problematic if the <key> itself has a ':' (for example
-        in the regular expression expansion).
-
-        [-o|--outputFileStem <outputFileStem>]
-        The output file stem to store data. This should *not* have a file
-        extension, or rather, any "." chars. Dots in the name are considered
-        part of the stem and are *not* considered extensions.
-
-        [--threads <numThreads>]
-        If specified, break the innermost analysis loop into <numThreads>
-        threads.
-
-        [-x|--man]
-        Show full help.
-
-        [-y|--synopsis]
-        Show brief help.
-
-        [--json]
-        If specified, output a JSON dump of final return.
-
-        [--followLinks]
-        If specified, follow symbolic links.
-
-        [-v|--verbosity <level>]
-        Set the app verbosity level.
-
-            0: No internal output;
-            1: Run start / stop output notification;
-            2: As with level '1' but with simpleProgress bar in 'pftree';
-            3: As with level '2' but with list of input dirs/files in 'pftree';
-            5: As with level '3' but with explicit file logging for
-                    - read
-                    - analyze
-                    - write
 
     EXAMPLES
 
     Perform a DICOM anonymization by processing specific tags:
 
-        pfdicom_tagSub                                      \\
-            -e dcm                                          \\
-            -I /var/www/html/normsmall                      \\
-            -O /var/www/html/anon                           \\
+        pfdicom_tagSub                                                          \\
+            --fileFilter dcm                                                    \\
+            --inputDir /var/www/html/normsmall                                  \\
+            --outputDir /var/www/html/anon                                      \\
             --tagStruct '
             {
                 "PatientName":              "%_name|patientID_PatientName",
@@ -281,12 +222,12 @@ def synopsis(ab_shortOnly = False):
 
         -- OR equivalently --
 
-        pfdicom_tagSub                                      \\
-            -e dcm                                          \\
-            -I /var/www/html/normsmall                      \\
-            -O /var/www/html/anon                           \\
-            --splitToken ","                                \\
-            --splitKeyValue "="                             \\
+        pfdicom_tagSub                                                          \\
+            --fileFilter dcm                                                    \\
+            --inputDir /var/www/html/normsmall                                  \\
+            --outputDir /var/www/html/anon                                      \\
+            --splitToken ","                                                    \\
+            --splitKeyValue "="                                                 \\
             --tagInfo '
                 PatientName         =  %_name|patientID_PatientName,
                 PatientID           =  %_md5|7_PatientID,
@@ -335,131 +276,71 @@ def synopsis(ab_shortOnly = False):
 
 
 
-parser  = ArgumentParser(description = str_desc, formatter_class = RawTextHelpFormatter)
+parserSelf  = ArgumentParser(description        = str_desc,
+                            formatter_class     = RawTextHelpFormatter,
+                            add_help            = False)
 
-parser.add_argument("-I", "--inputDir",
-                    help    = "input dir",
-                    dest    = 'inputDir')
-parser.add_argument("-i", "--inputFile",
-                    help    = "input file",
-                    dest    = 'inputFile',
-                    default = '')
-parser.add_argument("-e", "--extension",
-                    help    = "DICOM file extension",
-                    dest    = 'extension',
-                    default = '')
-parser.add_argument("-F", "--tagFile",
-                    help    = "JSON formatted file containing tags to sub",
-                    dest    = 'tagFile',
-                    default = '')
-parser.add_argument("-T", "--tagStruct",
+parserSelf.add_argument("--tagStruct",
                     help    = "JSON formatted tag sub struct",
                     dest    = 'tagStruct',
                     default = '')
-parser.add_argument("-n", "--tagInfo",
+parserSelf.add_argument("--tagInfo",
                     help        = "A custom delimited tag sub struct",
                     dest        = 'tagInfo',
                     default     = '')
-parser.add_argument("-k","--splitKeyValue",
+parserSelf.add_argument("--splitKeyValue",
                     help        = "Expression on which to split the <key><value> pairs",
                     dest        = 'splitKeyValue',
                     default     = ",")
-parser.add_argument("-s","--splitToken",
+parserSelf.add_argument("--splitToken",
                     help        = "Expression on which to split the <delimited_tag_info>",
                     dest        = 'splitToken',
                     default     = "++")
-parser.add_argument("-o", "--outputFileStem",
-                    help    = "output file",
-                    default = "",
-                    dest    = 'outputFileStem')
-parser.add_argument("-O", "--outputDir",
-                    help    = "output image directory",
-                    dest    = 'outputDir',
-                    default = '.')
-parser.add_argument("--printElapsedTime",
-                    help    = "print program run time",
-                    dest    = 'printElapsedTime',
-                    action  = 'store_true',
-                    default = False)
-parser.add_argument("--threads",
-                    help    = "number of threads for innermost loop processing",
-                    dest    = 'threads',
-                    default = "0")
-parser.add_argument("--outputLeafDir",
-                    help    = "formatting spec for output leaf directory",
-                    dest    = 'outputLeafDir',
-                    default = "")
-parser.add_argument("-x", "--man",
-                    help    = "man",
-                    dest    = 'man',
-                    action  = 'store_true',
-                    default = False)
-parser.add_argument("-y", "--synopsis",
-                    help    = "short synopsis",
-                    dest    = 'synopsis',
-                    action  = 'store_true',
-                    default = False)
-parser.add_argument("--json",
-                    help    = "output final return in json",
-                    dest    = 'json',
-                    action  = 'store_true',
-                    default = False)
-parser.add_argument("--followLinks",
-                    help    = "follow symbolic links",
-                    dest    = 'followLinks',
-                    action  = 'store_true',
-                    default = False)
-parser.add_argument("-v", "--verbosity",
-                    help    = "verbosity level for app",
-                    dest    = 'verbosity',
-                    default = "1")
-parser.add_argument('--version',
-                    help    = 'if specified, print version number',
-                    dest    = 'b_version',
-                    action  = 'store_true',
-                    default = False)
 
-args = parser.parse_args()
+parser  = ArgumentParser(description        = str_desc,
+                         formatter_class    = RawTextHelpFormatter,
+                         parents            = [pfdicom_parser, parserSelf],
+                         add_help           = False)
 
-if args.man or args.synopsis:
-    print(str_desc)
-    if args.man:
-        str_help     = synopsis(False)
-    else:
-        str_help     = synopsis(True)
-    print(str_help)
-    sys.exit(1)
 
-if args.b_version:
-    print("Version: %s" % str_version)
-    sys.exit(1)
+def earlyExit_check(args) -> int:
+    """Perform some preliminary checks
+    """
+    if args.man or args.synopsis:
+        print(str_desc)
+        if args.man:
+            str_help     = synopsis(False)
+        else:
+            str_help     = synopsis(True)
+        print(str_help)
+        return 1
+    if args.b_version:
+        print("Name:    %s\nVersion: %s" % (__pkg.name, __version__))
+        return 1
+    return 0
 
-# pudb.set_trace()
-pf_dicom_tagSub = pfdicom_tagSub.pfdicom_tagSub(
-                        inputDir            = args.inputDir,
-                        inputFile           = args.inputFile,
-                        extension           = args.extension,
-                        outputDir           = args.outputDir,
-                        outputFileStem      = args.outputFileStem,
-                        outputLeafDir       = args.outputLeafDir,
-                        tagFile             = args.tagFile,
-                        tagStruct           = args.tagStruct,
-                        splitToken          = args.splitToken,
-                        splitKeyValue       = args.splitKeyValue,
-                        tagInfo             = args.tagInfo,
-                        threads             = args.threads,
-                        followLinks         = args.followLinks,
-                        verbosity           = args.verbosity,
-                        json                = args.json
-                    )
+def main(argv=None):
 
-# And now run it!
-d_pfdicom_tagSub = pf_dicom_tagSub.run(timerStart = True)
+    d_pfdicom_tagSub    : dict = {}
+    args = parser.parse_args()
 
-if args.printElapsedTime:
-    pf_dicom_tagSub.dp.qprint(
-                                "Elapsed time = %f seconds" %
-                                d_pfdicom_tagSub['runTime']
-                            )
+    if earlyExit_check(args): return 1
 
-sys.exit(0)
+    # pudb.set_trace()
+    args.str_version        = __version__
+    args.str_desc           = synopsis(True)
+    pf_dicom_tagSub         = pfdicom_tagSub.pfdicom_tagSub(vars(args))
+
+    # And now run it!
+    d_pfdicom_tagSub = pf_dicom_tagSub.run(timerStart = True)
+
+    if args.printElapsedTime:
+        pf_dicom_tagSub.dp.qprint(
+                                    "Elapsed time = %f seconds" %
+                                    d_pfdicom_tagSub['runTime']
+                                )
+
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
