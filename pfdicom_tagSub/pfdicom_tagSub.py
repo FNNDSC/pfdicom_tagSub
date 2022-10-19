@@ -18,8 +18,6 @@ from        pfmisc              import  other
 from        pfmisc              import  error
 
 import      pudb
-# import      pftree
-# import      pfdicom
 from        pfdicom             import  pfdicom
 
 try:

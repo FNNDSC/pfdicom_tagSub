@@ -29,7 +29,13 @@ from    pfmisc              import other
 import  pfdicom
 from    pfdicom.__main__    import package_CLIfull as pfdicom_CLIfull
 from    pfdicom.__main__    import package_argsSynopsisFull as pfdicom_argSynopsis
-from    pfdicom.__main__    import parser as pfdicom_parser
+from    pfdicom.__main__    import parserSA as pfdicom_parser
+
+from    pfdicom.__main__    import DSpackage_CLI as DSpfdicom_CLI
+from    pfdicom.__main__    import DSpackage_argsSynopsisFull as DSpfdicom_argSynopsis
+from    pfdicom.__main__    import parserDS as DSpfdicom_parser
+
+from    pfdicom.__main__    import package_tagProcessingHelp
 
 str_desc = Colors.CYAN + """
 
@@ -73,7 +79,7 @@ str_desc = Colors.CYAN + """
 
 """ + Colors.NO_COLOUR
 
-packageCLI_self     = '''
+package_CLIself     = '''
         [--tagStruct <tagStruct>]                                               \\
         [--tagInfo <tagInfo>]                                                   \\
         [--splitToken <token>]                                                  \\
@@ -120,8 +126,10 @@ package_argsSynopsisSelf = """
         in the regular expression expansion).
 """
 
-package_CLIfull             = packageCLI_self       + pfdicom_CLIfull
+package_CLIfull             = package_CLIself       + pfdicom_CLIfull
+package_CLIDS               = package_CLIself       + DSpfdicom_CLI
 package_argsSynopsisFull    = pfdicom_argSynopsis   + package_argsSynopsisSelf
+package_argsSynopsisDS      = DSpfdicom_argSynopsis + package_argsSynopsisSelf
 
 def synopsis(ab_shortOnly = False):
     scriptName = os.path.basename(sys.argv[0])
@@ -197,7 +205,7 @@ def synopsis(ab_shortOnly = False):
         DICOM tags, saving the result in a corresponding directory and filename
         in the output tree.
 
-    ARGS ''' + package_argsSynopsisFull + '''
+    ARGS ''' + package_argsSynopsisFull + package_tagProcessingHelp + '''
 
 
     EXAMPLES
@@ -297,10 +305,15 @@ parserSelf.add_argument("--splitToken",
                     dest        = 'splitToken',
                     default     = "++")
 
-parser  = ArgumentParser(description        = str_desc,
-                         formatter_class    = RawTextHelpFormatter,
-                         parents            = [pfdicom_parser, parserSelf],
-                         add_help           = False)
+parserSA  = ArgumentParser( description        = str_desc,
+                            formatter_class    = RawTextHelpFormatter,
+                            parents            = [pfdicom_parser, parserSelf],
+                            add_help           = False)
+
+parserDS  = ArgumentParser( description        = str_desc,
+                            formatter_class    = RawTextHelpFormatter,
+                            parents            = [DSpfdicom_parser, parserSelf],
+                            add_help           = False)
 
 
 def earlyExit_check(args) -> int:
@@ -322,7 +335,7 @@ def earlyExit_check(args) -> int:
 def main(argv=None):
 
     d_pfdicom_tagSub    : dict = {}
-    args = parser.parse_args()
+    args = parserSA.parse_args()
 
     if earlyExit_check(args): return 1
 
