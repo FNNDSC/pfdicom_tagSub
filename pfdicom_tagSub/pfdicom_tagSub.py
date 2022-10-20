@@ -244,7 +244,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         path                = at_data[0]
         d_outputInfo        = at_data[1]
         str_cwd             = os.getcwd()
-        other.mkdir(self.str_outputDir)
+        other.mkdir(self.pf_tree.str_outputDir)
         filesSaved          = 0
         other.mkdir(path)
 
@@ -381,9 +381,6 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             'd_tagSub':     d_tagSub,
             'runTime':      other.toc()
         }
-
-        if self.b_json:
-            self.ret_dump(d_ret, **kwargs)
 
         self.dp.qprint('Returning from pfdicom_tagSub run...', level = 1)
 
