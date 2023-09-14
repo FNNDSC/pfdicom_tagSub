@@ -19,6 +19,7 @@ from        pfmisc              import  error
 
 import      pudb
 from        pfdicom             import  pfdicom
+from pydicom.dataset import FileDataset, FileMetaDataset
 
 try:
     from    .                   import __name__, __version__
@@ -174,6 +175,23 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             d_DCMfileRead   = self.DICOMfile_read(
                                     file        = '%s/%s' % (str_path, f)
             )
+            """
+            https://pydicom.github.io/pydicom/stable/old/private_data_elements.html
+            
+            [2023-09-13] : Most of the dicom images can contain a set of 
+            private data elements.
+            Private data elements are stored in Datasets just like other data elements. 
+            When reading files with pydicom, they will automatically be read and available for display. 
+            Pydicom knows descriptive names for some ‘well-known’ private data elements,
+            but for others it may not be able to show anything except the tag and the value.
+            
+            One part of anonymizing a DICOM file is to ensure that private data elements have been removed,
+            as there is no guarantee as to what kind of information might be contained in them.
+            Pydicom provides a convenient function Dataset.remove_private_tags() to recursively remove private elements:
+            """
+            self.dp.qprint("Removing private tags")
+            d_DCMfileRead['d_DICOM']['dcm'].remove_private_tags()
+
             b_status        = b_status and d_DCMfileRead['status']
             l_DCMRead.append(d_DCMfileRead)
             str_path        = d_DCMfileRead['inputPath']
