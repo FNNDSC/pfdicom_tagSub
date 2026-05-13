@@ -152,6 +152,9 @@ Command line arguments
         extension, or rather, any "." chars. Dots in the name are considered
         part of the stem and are *not* considered extensions.
 
+        [--removePrivateTags]
+        If specified, remove all the private tag elements from the input DICOMs
+
         [--threads <numThreads>]
         If specified, break the innermost analysis loop into <numThreads>
         threads.

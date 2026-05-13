@@ -64,6 +64,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         self.tic_start                  = 0.0
         self.pp                         = pprint.PrettyPrinter(indent=4)
         self.verbosityLevel             = -1
+        self.removePrivate              = False
 
     def __init__(self, *args, **kwargs):
         """
@@ -130,12 +131,14 @@ class pfdicom_tagSub(pfdicom.pfdicom):
         super().__init__(*args, **kwargs)
 
         for key, value in kwargs.items():
+
             if key == "outputFileType":     outputFile_process(value)
             if key == 'tagFile':            tagFile_process(value)
             if key == 'tagStruct':          tagStruct_process(value)
             if key == 'splitToken':         set_splitToken(value)
             if key == 'splitKeyValue':      self.str_splitKeyValue      = value
             if key == 'verbosity':          self.verbosityLevel         = int(value)
+            if key == 'removePrivateTags':  self.removePrivate          = bool(value)
 
         if self.args['tagInfo']:            tagInfo_to_tagStruct(self.args['tagInfo'])
 
@@ -189,8 +192,13 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             as there is no guarantee as to what kind of information might be contained in them.
             Pydicom provides a convenient function Dataset.remove_private_tags() to recursively remove private elements:
             """
-            self.dp.qprint("Removing private tags")
-            d_DCMfileRead['d_DICOM']['dcm'].remove_private_tags()
+            if self.removePrivate:
+                self.dp.qprint("Removing private tags")
+                # Before calling remove_private_tags(), verify the DICOM object exists
+                if d_DCMfileRead['d_DICOM']['dcm'] is not None:
+                    d_DCMfileRead['d_DICOM']['dcm'].remove_private_tags()
+                else:
+                    self.dp.qprint("Error: DICOM file was not loaded properly")
 
             b_status        = b_status and d_DCMfileRead['status']
             l_DCMRead.append(d_DCMfileRead)

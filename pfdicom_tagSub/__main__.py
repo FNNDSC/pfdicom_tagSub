@@ -124,6 +124,9 @@ package_argsSynopsisSelf = """
         The token on which to split the <key> <value> pair. Default is ':'
         but this can be problematic if the <key> itself has a ':' (for example
         in the regular expression expansion).
+        
+        [--removePrivateTags]
+        If specified, remove all the private tag elements from the input DICOMs
 """
 
 package_CLIfull             = package_CLIself       + pfdicom_CLIfull
@@ -304,6 +307,11 @@ parserSelf.add_argument("--splitToken",
                     help        = "Expression on which to split the <delimited_tag_info>",
                     dest        = 'splitToken',
                     default     = "++")
+parserSelf.add_argument("--removePrivateTags",
+                    help        = "If specified, iteratively remove all the private elements",
+                    dest        = 'removePrivateTags',
+                    action      = 'store_true',
+                    default     = False)
 
 parserSA  = ArgumentParser( description        = str_desc,
                             formatter_class    = RawTextHelpFormatter,
