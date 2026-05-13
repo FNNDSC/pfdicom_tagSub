@@ -86,7 +86,7 @@ package_CLIself     = '''
         [--splitKey <keySplit>]                                                 \\'''
 
 package_argsSynopsisSelf = """
-        [-T|--tagStruct <JSONtagStructure>]
+        [--tagStruct <JSONtagStructure>]
         Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
         string passed directly in the command line. Note that sometimes protecting
         a JSON string can be tricky, especially when used in scripts or as variable
@@ -115,12 +115,12 @@ package_argsSynopsisSelf = """
                            re:.*hysician"   = %_md5|4_#tag"
 
 
-        [-s|--splitToken <split_token>]
+        [--splitToken <split_token>]
         The token on which to split the <delimited_parameters> string.
         Default is '++'. Take care with how this is quoted, esp as regards padded
         spaces!
 
-        [-k|--splitKeyValue <keyValueSplit>]
+        [--splitKeyValue <keyValueSplit>]
         The token on which to split the <key> <value> pair. Default is ':'
         but this can be problematic if the <key> itself has a ':' (for example
         in the regular expression expansion).

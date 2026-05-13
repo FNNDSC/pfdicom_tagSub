@@ -1,4 +1,4 @@
-# Turn off all logging for modules in this libary.
+# Turn off all logging for modules in this library.
 import logging
 logging.disable(logging.CRITICAL)
 
@@ -138,7 +138,7 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             if key == 'splitToken':         set_splitToken(value)
             if key == 'splitKeyValue':      self.str_splitKeyValue      = value
             if key == 'verbosity':          self.verbosityLevel         = int(value)
-            if key == 'removePrivateTags':  self.removePrivate          = bool(value)
+            if key == 'removePrivateTags':  self.removePrivate          = bool(value) # keeping the feature optional
 
         if self.args['tagInfo']:            tagInfo_to_tagStruct(self.args['tagInfo'])
 
@@ -191,6 +191,8 @@ class pfdicom_tagSub(pfdicom.pfdicom):
             One part of anonymizing a DICOM file is to ensure that private data elements have been removed,
             as there is no guarantee as to what kind of information might be contained in them.
             Pydicom provides a convenient function Dataset.remove_private_tags() to recursively remove private elements:
+            
+            [2026-05-13] : Added removePrivate flag to remove private data elements if set as True (Default is False)
             """
             if self.removePrivate:
                 self.dp.qprint("Removing private tags")

@@ -73,21 +73,21 @@ Command line arguments
 
 .. code:: html
 
-        -I|--inputDir <inputDir>
+        [--inputDir <inputDir>
         Input DICOM directory to examine. By default, the first file in this
         directory is examined for its tag information. There is an implicit
         assumption that each <inputDir> contains a single DICOM series.
 
-        [-i|--inputFile <inputFile>]
+        [--inputFile <inputFile>]
         An optional <inputFile> specified relative to the <inputDir>. If
         specified, then do not perform a directory walk, but convert only
         this file.
 
-        [-e|--extension <DICOMextension>]
+        [--extension <DICOMextension>]
         An optional extension to filter the DICOM files of interest from the
         <inputDir>.
 
-        -O|--outputDir <outputDir>
+        [--outputDir <outputDir>
         The output root directory that will contain a tree structure identical
         to the input directory, and each "leaf" node will contain the analysis
         results.
@@ -106,10 +106,10 @@ Command line arguments
         final directory containing output with the text 'preview-' which
         can be useful in describing some features of the output set.
 
-        [-F|--tagFile <JSONtagFile>]
+        [--tagFile <JSONtagFile>]
         Parse the tags and their "subs" from a JSON formatted <JSONtagFile>.
 
-        [-T|--tagStruct <JSONtagStructure>]
+        [--tagStruct <JSONtagStructure>]
         Parse the tags and their "subs" from a JSON formatted <JSONtagStucture>
         string passed directly in the command line. Note that sometimes protecting
         a JSON string can be tricky, especially when used in scripts or as variable
@@ -138,16 +138,16 @@ Command line arguments
                            re:.*hysician"   = %_md5|4_#tag"
 
 
-        [-s|--splitToken <split_token>]
+        [--splitToken <split_token>]
         The token on which to split the <delimited_parameters> string.
         Default is '++'.
 
-        [-k|--splitKeyValue <keyValueSplit>]
+        [--splitKeyValue <keyValueSplit>]
         The token on which to split the <key> <value> pair. Default is ':'
         but this can be problematic if the <key> itself has a ':' (for example
         in the regular expression expansion).
 
-        [-o|--outputFileStem <outputFileStem>]
+        [--outputFileStem <outputFileStem>]
         The output file stem to store data. This should *not* have a file
         extension, or rather, any "." chars. Dots in the name are considered
         part of the stem and are *not* considered extensions.
@@ -159,10 +159,10 @@ Command line arguments
         If specified, break the innermost analysis loop into <numThreads>
         threads.
 
-        [-x|--man]
+        [--man]
         Show full help.
 
-        [-y|--synopsis]
+        [--synopsis]
         Show brief help.
 
         [--json]
@@ -171,7 +171,7 @@ Command line arguments
         [--followLinks]
         If specified, follow symbolic links.
 
-        [-v|--verbosity <level>]
+        [--verbosity <level>]
         Set the app verbosity level.
 
             0: No internal output;
@@ -192,9 +192,9 @@ Perform a DICOM anonymization by processing specific tags:
 .. code:: bash
 
         pfdicom_tagSub                                      \
-            -e dcm                                          \
-            -I /var/www/html/normsmall                      \
-            -O /var/www/html/anon                           \
+            --fileFilter dcm                                \
+            --inputDir /var/www/html/normsmall              \
+            --outputDir /var/www/html/anon                  \
             --tagStruct '
             {
                 "PatientName":              "%_name|patientID_PatientName",
@@ -212,9 +212,9 @@ Perform a DICOM anonymization by processing specific tags:
 .. code:: bash
 
         pfdicom_tagSub                                      \
-            -e dcm                                          \
-            -I /var/www/html/normsmall                      \
-            -O /var/www/html/anon                           \
+            --fileFilter dcm                                \
+            --inputDir /var/www/html/normsmall              \
+            --outputDir /var/www/html/anon                  \
             --splitToken ","                                \
             --splitKeyValue "="                             \
             --tagInfo '
