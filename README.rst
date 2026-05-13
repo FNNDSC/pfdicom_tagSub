@@ -83,7 +83,7 @@ Command line arguments
         specified, then do not perform a directory walk, but convert only
         this file.
 
-        [--extension <DICOMextension>]
+        [--fileFilter <fileFilter>]
         An optional extension to filter the DICOM files of interest from the
         <inputDir>.
 

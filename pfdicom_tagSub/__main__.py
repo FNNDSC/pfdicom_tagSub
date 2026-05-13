@@ -83,7 +83,8 @@ package_CLIself     = '''
         [--tagStruct <tagStruct>]                                               \\
         [--tagInfo <tagInfo>]                                                   \\
         [--splitToken <token>]                                                  \\
-        [--splitKey <keySplit>]                                                 \\'''
+        [--splitKey <keySplit>]                                                 \\
+        [--removePrivateTags]                                                   \\'''
 
 package_argsSynopsisSelf = """
         [--tagStruct <JSONtagStructure>]
